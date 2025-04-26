@@ -1,0 +1,128 @@
+local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
+
+---====== Create entity ======---
+
+local entity = spawner.Create({
+    Entity = {
+        Name = "Smiler",
+        Asset = "rbxassetid://75922777251456",
+        HeightOffset = 1
+    },
+    Lights = {
+        Flicker = {
+            Enabled = true,
+            Duration = 1
+        },
+        Shatter = true,
+        Repair = false
+    },
+    Earthquake = {
+        Enabled = false
+    },
+    CameraShake = {
+        Enabled = true,
+        Range = 100,
+        Values = {20, 20, 1, 2} -- Magnitude, Roughness, FadeIn, FadeOut
+    },
+    Movement = {
+        Speed = 850,
+        Delay = 12,
+        Reversed = false
+    },
+    Rebounding = {
+        Enabled = true,
+        Type = "Ambush", -- "Blitz"
+        Min = 5,
+        Max = 20,
+        Delay = 1
+    },
+    Damage = {
+        Enabled = true,
+        Range = 100,
+        Amount = 200
+    },
+    Crucifixion = {
+        Enabled = true,
+        Range = 100,
+        Resist = false,
+        Break = false
+    },
+    Death = {
+        Type = "Guiding", -- "Curious"
+        Hints = {"You die to Smiler", "It's stronger than Ambush", "It is now Ambush upgraded", "Must concentrate"},
+        Cause = "Smiler"
+    }
+})
+
+---====== Debug entity ======---
+
+entity:SetCallback("OnSpawned", function()
+    local abrt = Instance.new("ColorCorrectionEffect")
+    abrt.Name = "Smiler Light Flicker"
+    abrt.Parent = game.Lighting
+    abrt.Brightness = 0.1
+    abrt.Contrast = 0.3
+    abrt.Enabled = false
+    abrt.Saturation = -0.4
+    abrt.TintColor = Color3.fromRGB(255, 255, 255)
+
+    local val1 = Instance.new("IntValue")
+    val1.Name = "SmilerVal1"
+    val1.Parent = game.Players.LocalPlayer
+    val1.Value = 0
+
+    local val2 = Instance.new("IntValue")
+    val2.Name = "SmilerVal2"
+    val2.Parent = game.Players.LocalPlayer
+    val2.Value = 0
+
+    game:GetService("ReplicatedStorage").Sounds.BulbCharge:Play()
+    wait(0.772)
+
+    while true do
+        wait(0.1)
+        if val1.Value == 0 then
+            abrt.Enabled = true
+            game:GetService("ReplicatedStorage").Sounds.BulbZap.PlaybackSpeed = 0.9
+            game:GetService("ReplicatedStorage").Sounds.BulbZap:Play()
+            val1.Value = val1.Value + 1
+            val2.Value = val2.Value + 1
+        elseif val1.Value == 1 then
+            abrt.Enabled = false
+            val1.Value = val1.Value + 1
+            if val1.Value == 2 then
+                val1.Value = 0
+            end
+            val2.Value = val2.Value + 1
+        end
+        if val2.Value == 100 then
+            wait(0.1)
+            game:GetService("ReplicatedStorage").Sounds.BulbZap.PlaybackSpeed = 1
+            break
+        end
+    end
+
+    abrt:Destroy()
+    val1:Destroy()
+    val2:Destroy()
+end)
+
+entity:SetCallback("OnDamagePlayer", function(newHealth)
+    if newHealth == 0 then
+        local jumpscare = loadstring(game:HttpGet("https://pastebin.com/raw/MwNSDg7E"))()
+        local JS = jumpscare.Create({
+            image = {
+                Asset = "rbxassetid://100301640019139"
+            },
+            Audio = {
+                Asset = "rbxassetid://5263560566",
+                AC = false -- Play full audio
+            }
+        })
+        JS:Run()
+    end
+end)
+
+---====== Run entity ======---
+
+entity:Run()
