@@ -107,21 +107,6 @@ entity:SetCallback("OnSpawned", function()
     val2:Destroy()
 end)
 
-entity:SetCallback("OnDamagePlayer", function(newHealth)
-    if newHealth == 0 then
-        local jumpscare = loadstring(game:HttpGet("https://pastebin.com/raw/MwNSDg7E"))()
-        local JS = jumpscare.Create({
-            image = {
-                Asset = "rbxassetid://100301640019139"
-            },
-            Audio = {
-                Asset = "rbxassetid://5263560566",
-                AC = false -- Play full audio
-            }
-        })
-        JS:Run()
-    end
-end)
 
 ---====== Run entity ======---
 
