@@ -1,0 +1,101 @@
+local commonSense = game:GetObjects("rbxassetid://75969063020403")[1]
+local currentLoadedRoom = workspace.CurrentRooms[game:GetService("ReplicatedStorage").GameData.LatestRoom.Value]
+local FigureSetup = currentLoadedRoom.FigureSetup
+local SpawnPoint = FigureSetup.InitialPath["5"]
+local FigureNodes = FigureSetup.FigureNodes:GetChildren()
+local TweenService = game:GetService("TweenService")
+
+commonSense.CFrame = SpawnPoint.CFrame
+commonSense.Parent = workspace
+
+local constantSpeed = 10
+
+local function cleanCurrentRoom()
+    local LightFixtures = currentLoadedRoom.Assets:FindFirstChild("Light_Fixtures")
+    local LightFixtures2 = currentLoadedRoom.Assets:FindFirstChild("Light_Fixtures2")
+    local chandeliers = currentLoadedRoom.Assets:GetChildren()
+
+    if LightFixtures then
+        LightFixtures:Destroy()
+    end
+
+    if LightFixtures2 then
+        LightFixtures2:Destroy()
+    end
+
+    for _, object in ipairs(chandeliers) do
+        if object.Name == "Chandelier" then
+            object:Destroy()
+        end
+    end
+end
+
+local function moveToRandomNode()
+    local randomNode = FigureNodes[math.random(1, #FigureNodes)]
+    local targetCFrame = randomNode.CFrame
+    local distance = (targetCFrame.Position - commonSense.Position).Magnitude
+    local travelTime = distance / constantSpeed
+
+    local tweenInfo = TweenInfo.new(
+        travelTime, 
+        Enum.EasingStyle.Linear, 
+        Enum.EasingDirection.Out 
+    )
+
+    local tween = TweenService:Create(commonSense, tweenInfo, {CFrame = targetCFrame})
+
+    tween.Completed:Connect(moveToRandomNode)
+    tween:Play()
+end
+
+local function createFirePart()
+    local modelPos = commonSense.Position
+    local rx = math.random(1, 8)
+    local rz = math.random(1, 8)
+
+    local part = Instance.new("Part")
+    part.Parent = game.Workspace
+    part.Size = Vector3.new(1, 1, 1)
+    part.Anchored = true
+    part.Name = "Fire"
+    part.Transparency = 1
+    part.CanCollide = false
+    part.Position = modelPos + Vector3.new(rx, 0, rz)
+
+    game:GetService("Debris"):AddItem(part, 5)
+
+    local fire = Instance.new("Fire")
+    fire.Parent = part
+    fire.Size = 5
+
+    local function dmg()
+        local player = game.Players.LocalPlayer
+        local hum = player.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.Health = hum.Health - 1
+            local ReSt = game:GetService("ReplicatedStorage")
+            ReSt.GameStats["Player_" .. player.Name].Total.DeathCause.Value = "Common Sense's Fire"
+            firesignal(game.ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, {"You died to Common Sense","Don't step on its flames","Keep going"},"Blue")
+        end
+    end
+
+    part.Touched:Connect(dmg)
+    part.TouchEnded:Connect(dmg)
+end
+
+cleanCurrentRoom()
+moveToRandomNode()
+
+coroutine.wrap(function()
+    game.Workspace:WaitForChild("Common Sense")
+    repeat
+        wait(0.05)
+        createFirePart()
+    until not game.Workspace:FindFirstChild("Common Sense")
+end)()
+
+game:GetService("ReplicatedStorage").GameData.LatestRoom.Changed:Connect(function()
+    if commonSense.Parent then
+        commonSense:Destroy()
+    end
+end)
