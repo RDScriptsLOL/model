@@ -1,0 +1,80 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+local Rooms = workspace.CurrentRooms[game:GetService("ReplicatedStorage").GameData.LatestRoom.Value]
+local Humanoid = Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+local OGNodes = Rooms:FindFirstChild("PathfindNodes")
+if OGNodes then
+        local NewNodes = OGNodes:Clone()
+        NewNodes.Parent = Rooms
+        NewNodes.Name = "Nodes"
+end
+
+local EnableDamage = true
+local Spawn_HungerSound = false
+
+local function setFPS(fps)
+    if fps <= 0 then
+        game:GetService("RunService"):Set3dRenderingEnabled(false)
+    else
+        game:GetService("RunService"):Set3dRenderingEnabled(true)
+        local targetTime = 1/fps
+        local start = tick()
+        while tick() - start < targetTime do end
+    end
+end
+
+local Spawn = Instance.new("Sound", workspace)
+Spawn.SoundId = "rbxassetid://933230732"
+Spawn.Volume = 1
+Spawn.Name = "Hunger_SpawnSound"
+
+game.Workspace.CurrentRooms.ChildAdded:Connect(function()
+    local core = game.Workspace:FindFirstChild("Hunger")
+    if core then core:Destroy() end
+    EnableDamage = true
+end)
+
+Spawn:Play()
+Spawn.Ended:Connect(function()
+    Spawn:Destroy()
+    Spawn_HungerSound = true
+    local Hunger = game:GetObjects("rbxassetid://103184019870675")[1]
+    Hunger.Name = "Hunger"
+    local num = math.floor(#Rooms.Nodes:GetChildren() / 2)
+    Hunger.CFrame = (num == 0 and Rooms.Base or Rooms.Nodes[num]).CFrame + Vector3.new(0, 3, 0)
+    Hunger.Parent = Workspace
+
+    while EnableDamage and Hunger and Hunger.Parent do
+        local _, found = workspace.CurrentCamera:WorldToScreenPoint(Hunger.Position)
+        if not found and Humanoid and Humanoid.Health > 0 then
+            Humanoid.Health -= 5
+            if Hunger:FindFirstChild("Attack") then
+                Hunger.Attack:Play()
+            end
+            setFPS(5)
+            wait(0.1)
+            setFPS(60)
+            if Humanoid.Health <= 0 then
+                ReplicatedStorage.GameStats["Player_"..Players.LocalPlayer.Name].Total.DeathCause.Value = "Hunger"
+                firesignal(game.ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, {
+                    "You died to Hunger",
+                    "You must look at it",
+                    "Keep going"
+                }, "Blue")
+                break
+            end
+        end
+        wait(0.1)
+    end
+end)
+
+game:GetService("ReplicatedStorage").GameData.LatestRoom.Changed:Connect(function(v)
+    if not Spawn_HungerSound then
+        if Humanoid then
+            Humanoid.Health = 0
+            ReplicatedStorage.GameStats["Player_" .. Players.LocalPlayer.Name].Total.DeathCause.Value = "Hunger"
+            firesignal(game.ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, {"You died to Hunger","Don't open the next door during the hunger roar","Keep going"}, "Blue")
+        end
+    end
+end)
