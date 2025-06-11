@@ -1,61 +1,62 @@
+---====== Load spawner ======---
+
 local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
 
 ---====== Create entity ======---
 
 local entity = spawner.Create({
-    Entity = {
-        Name = "Smiler",
-        Asset = "rbxassetid://75922777251456",
-        HeightOffset = 1
-    },
-    Lights = {
-        Flicker = {
-            Enabled = true,
-            Duration = 1
-        },
-        Shatter = true,
-        Repair = false
-    },
-    Earthquake = {
-        Enabled = false
-    },
-    CameraShake = {
-        Enabled = true,
-        Range = 100,
-        Values = {20, 20, 1, 2} -- Magnitude, Roughness, FadeIn, FadeOut
-    },
-    Movement = {
-        Speed = 850,
-        Delay = 12,
-        Reversed = false
-    },
-    Rebounding = {
-        Enabled = true,
-        Type = "Ambush", -- "Blitz"
-        Min = 5,
-        Max = 20,
-        Delay = 1
-    },
-    Damage = {
-        Enabled = true,
-        Range = 100,
-        Amount = 200
-    },
-    Crucifixion = {
-        Enabled = true,
-        Range = 100,
-        Resist = false,
-        Break = false
-    },
-    Death = {
-        Type = "Guiding", -- "Curious"
-        Hints = {"You die to Smiler", "It's stronger than Ambush", "It is now Ambush upgraded", "Must concentrate"},
-        Cause = "Smiler"
-    }
+	Entity = {
+		Name = "Smiler",
+		Asset = "https://github.com/RDScriptsLOL/model/raw/refs/heads/main/n.rbxm",
+		HeightOffset = 1
+	},
+	Lights = {
+		Flicker = {
+			Enabled = true,
+			Duration = 1
+		},
+		Shatter = true,
+		Repair = false
+	},
+	Earthquake = {
+		Enabled = false
+	},
+	CameraShake = {
+		Enabled = true,
+		Range = 100,
+		Values = {20, 20, 1, 2} -- Magnitude, Roughness, FadeIn, FadeOut
+	},
+	Movement = {
+		Speed = 100,
+		Delay = 2,
+		Reversed = false
+	},
+	Rebounding = {
+		Enabled = true,
+		Type = "Ambush", -- "Blitz"
+		Min = 5,
+		Max = 20,
+		Delay = 2
+	},
+	Damage = {
+		Enabled = true,
+		Range = 100,
+		Amount = 99999
+	},
+	Crucifixion = {
+		Enabled = true,
+		Range = 100,
+		Resist = false,
+		Break = false
+	},
+	Death = {
+		Type = "Guiding", -- "Curious"
+		Hints = {"You died to Smiler", "It's stronger than Ambush", "It is now Ambush upgraded", "Must concentrate"},
+		Cause = ""
+	}
 })
 
 ---====== Debug entity ======---
-
 entity:SetCallback("OnSpawned", function()
     local abrt = Instance.new("ColorCorrectionEffect")
     abrt.Name = "Smiler Light Flicker"
@@ -106,8 +107,6 @@ entity:SetCallback("OnSpawned", function()
     val1:Destroy()
     val2:Destroy()
 end)
-
-
 ---====== Run entity ======---
 
 entity:Run()
