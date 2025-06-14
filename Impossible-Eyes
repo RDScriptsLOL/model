@@ -1,46 +1,131 @@
-game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace = game:GetService("Workspace")
-local LatestRoom = ReplicatedStorage.GameData.LatestRoom.Value
-local Rooms = Workspace.CurrentRooms:FindFirstChild(tostring(LatestRoom)) 
-local OGNodes = Rooms:FindFirstChild("PathfindNodes")
-
-if OGNodes then
-    local NewNodes = OGNodes:Clone()
-    NewNodes.Parent = Rooms
-    NewNodes.Name = "Nodes"
+local function safeWaitForLatestRoom()
+    while not game.ReplicatedStorage:FindFirstChild("GameData") or not game.ReplicatedStorage.GameData:FindFirstChild("LatestRoom") do
+        task.wait()
+    end
+    game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+    return game.ReplicatedStorage.GameData.LatestRoom.Value
 end
 
-wait(0.5)
-local enableDamage = true
-local currentLoadedRoom = workspace.CurrentRooms[game:GetService("ReplicatedStorage").GameData.LatestRoom.Value]
-local eyes = game:GetObjects("rbxassetid://87636504401588")[1]
-
-game.Workspace.CurrentRooms.ChildAdded:Connect(function()
-    local core = game.Workspace:FindFirstChild("IMPEyes")
-    if core then core:Destroy() end
-    enableDamage = true
-end)
-
-local num = math.floor(#currentLoadedRoom.Nodes:GetChildren() / 2)
-eyes.CFrame = (num == 0 and currentLoadedRoom.Base or currentLoadedRoom.Nodes[num]).CFrame + Vector3.new(0, 3, 0)
-eyes.Parent = workspace
-
-local hum = game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-while true and enableDamage do
-    if not game.Workspace:FindFirstChild("IMPEyes") then break end
-    local _, found = workspace.CurrentCamera:WorldToScreenPoint(eyes.Position)
-    if found then
-        hum.Health -= 1
-        eyes.Attack:Play()
-        if hum.Health <= 0 then
-            game:GetService("ReplicatedStorage").GameStats["Player_" .. game.Players.LocalPlayer.Name].Total.DeathCause.Value = "Eyes"
-            firesignal(game.ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, {
-                "You died to Eyes",
-                "It's different from normal it",
-                "It can kill you faster"
-            }, "Blue")
-        end
+local function safeGetCurrentRoom(latestRoom)
+    while not workspace:FindFirstChild("CurrentRooms") do
+        task.wait()
     end
-    task.wait(0.01)
+    
+    local maxAttempts = 10
+    for i = 1, maxAttempts do
+        local room = workspace.CurrentRooms:FindFirstChild(tostring(latestRoom))
+        if room then
+            return room
+        end
+        task.wait(0.5)
+    end
+end
+
+local function main()
+    local LatestRoom = safeWaitForLatestRoom()
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local Workspace = game:GetService("Workspace")
+    
+    local Rooms = safeGetCurrentRoom(LatestRoom)
+    local OGNodes = Rooms:FindFirstChild("PathfindNodes")
+
+    if OGNodes then
+        local NewNodes = OGNodes:Clone()
+        NewNodes.Parent = Rooms
+        NewNodes.Name = "Nodes"
+    end
+
+    task.wait(0.5)
+    
+    local currentLoadedRoom = workspace.CurrentRooms[LatestRoom]
+    local success, eyes = pcall(function()
+        return game:GetObjects("rbxassetid://140662472369935")[1]
+    end)
+    
+    if not success or not eyes then
+        return
+    end
+
+    eyes.Name = "IMPEyes"
+
+    local nodes = currentLoadedRoom:FindFirstChild("Nodes") or currentLoadedRoom:FindFirstChild("PathfindNodes")
+    if not nodes then
+        eyes:Destroy()
+        return
+    end
+    local numChildren = #nodes:GetChildren()
+    if numChildren == 0 then
+        eyes:Destroy()
+        return
+    end
+    local num = math.floor(numChildren / 2)
+    local targetNode = num == 0 and currentLoadedRoom:FindFirstChild("Base") or nodes:GetChildren()[num]
+    
+    if not targetNode then
+        eyes:Destroy()
+        return
+    end
+    eyes:PivotTo(targetNode.CFrame + Vector3.new(0, 3, 0))
+    eyes.Parent = workspace
+
+    local enableDamage = true
+
+    game.Workspace.CurrentRooms.ChildAdded:Connect(function()
+        local core = game.Workspace:FindFirstChild("IMPEyes")
+        if core then core:Destroy() end
+        enableDamage = true
+    end)
+
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local hum = character:FindFirstChildOfClass("Humanoid")
+    
+    if not hum then
+        return
+    end
+
+    while true and enableDamage do
+        if not game.Workspace:FindFirstChild("IMPEyes") then break end
+        
+        local camera = workspace.CurrentCamera
+        if not camera then
+            task.wait(0.1)
+            continue
+        end
+
+        local _, found = camera:WorldToScreenPoint(eyes.Position)
+        if found then
+            hum.Health -= 1
+            if eyes:FindFirstChild("Attack") then
+                eyes.Attack:Play()
+            end
+            
+            if hum.Health <= 0 then
+                local stats = ReplicatedStorage:FindFirstChild("GameStats")
+                if stats then
+                    local playerStat = stats:FindFirstChild("Player_"..player.Name)
+                    if playerStat and playerStat:FindFirstChild("Total") then
+                        playerStat.Total.DeathCause.Value = "Eyes"
+                    end
+                end
+                
+                local deathHint = ReplicatedStorage:FindFirstChild("RemotesFolder") and 
+                                 ReplicatedStorage.RemotesFolder:FindFirstChild("DeathHint")
+                if deathHint then
+                    firesignal(deathHint.OnClientEvent, {
+                        "You died to Eyes",
+                        "It's different from normal it",
+                        "It can kill you faster"
+                    }, "Blue")
+                end
+                break
+            end
+        end
+        task.wait(0.01)
+    end
+end
+
+local success, err = pcall(main)
+if not success then
+    warn("Error: "..tostring(err))
 end
