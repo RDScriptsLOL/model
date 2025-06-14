@@ -27,8 +27,8 @@ local entity = spawner.Create({
 		Values = {20, 20, 1, 2} -- Magnitude, Roughness, FadeIn, FadeOut
 	},
 	Movement = {
-		Speed = 100,
-		Delay = 2,
+		Speed = 850,
+		Delay = 12,
 		Reversed = false
 	},
 	Rebounding = {
@@ -36,7 +36,7 @@ local entity = spawner.Create({
 		Type = "Ambush", -- "Blitz"
 		Min = 5,
 		Max = 20,
-		Delay = 2
+		Delay = 1
 	},
 	Damage = {
 		Enabled = true,
@@ -60,7 +60,7 @@ local entity = spawner.Create({
 entity:SetCallback("OnSpawned", function()
     local abrt = Instance.new("ColorCorrectionEffect")
     abrt.Name = "Smiler Light Flicker"
-    abrt.Parent = game.Lighting
+    abrt.Parent = game:GetService("Lighting")
     abrt.Brightness = 0.1
     abrt.Contrast = 0.3
     abrt.Enabled = false
@@ -69,19 +69,18 @@ entity:SetCallback("OnSpawned", function()
 
     local val1 = Instance.new("IntValue")
     val1.Name = "SmilerVal1"
-    val1.Parent = game.Players.LocalPlayer
+    val1.Parent = game:GetService("Players").LocalPlayer
     val1.Value = 0
 
     local val2 = Instance.new("IntValue")
     val2.Name = "SmilerVal2"
-    val2.Parent = game.Players.LocalPlayer
+    val2.Parent = game:GetService("Players").LocalPlayer
     val2.Value = 0
 
     game:GetService("ReplicatedStorage").Sounds.BulbCharge:Play()
-    wait(0.772)
-
+    task.wait(0.772)
     while true do
-        wait(0.1)
+        task.wait(0.1)
         if val1.Value == 0 then
             abrt.Enabled = true
             game:GetService("ReplicatedStorage").Sounds.BulbZap.PlaybackSpeed = 0.9
@@ -97,7 +96,7 @@ entity:SetCallback("OnSpawned", function()
             val2.Value = val2.Value + 1
         end
         if val2.Value == 100 then
-            wait(0.1)
+            task.wait(0.1)
             game:GetService("ReplicatedStorage").Sounds.BulbZap.PlaybackSpeed = 1
             break
         end
