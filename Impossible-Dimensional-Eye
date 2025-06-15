@@ -1,8 +1,4 @@
----====== Load spawner ======---
-
 local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
-
----====== Create entity ======---
 
 local entity = spawner.Create({
     Entity = {
@@ -24,7 +20,7 @@ local entity = spawner.Create({
     CameraShake = {
         Enabled = true,
         Range = 100,
-        Values = {1.5, 20, 0.1, 1} -- Magnitude, Roughness, FadeIn, FadeOut
+        Values = {1.5, 20, 0.1, 1}
     },
     Movement = {
         Speed = 1,
@@ -33,7 +29,7 @@ local entity = spawner.Create({
     },
     Rebounding = {
         Enabled = false,
-        Type = "Ambush", -- "Blitz"
+        Type = "Ambush",
         Min = 1,
         Max = 1,
         Delay = 2
@@ -50,13 +46,12 @@ local entity = spawner.Create({
         Break = true
     },
     Death = {
-        Type = "Guiding", -- "Curious"
+        Type = "Guiding",
         Hints = {"Death", "Hints", "Go", "Here"},
         Cause = ""
     }
 })
 
----====== Run entity ======---
 entity:Run()
 
 local running = true
@@ -71,7 +66,7 @@ coroutine.wrap(function()
         local _, onScreen = camera:WorldToViewportPoint(eyes.Position)
         
         if onScreen then
-            hum.Health -= 1  -- 每帧减少1点血量
+            hum.Health -= 1
             if hum.Health <= 0 then
                 game:GetService("ReplicatedStorage").GameStats["Player_" .. game.Players.LocalPlayer.Name].Total.DeathCause.Value = "Dimensional Eye"
                 firesignal(game.ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, {
@@ -87,7 +82,7 @@ end)()
 
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 coroutine.wrap(function()
-local eyeModel = game.Workspace:FindFirstChild("Dimensional eye")
+    local eyeModel = game.Workspace:FindFirstChild("Dimensional eye")
     wait(10)
     running = false
     eyeModel:Destroy()
