@@ -1,9 +1,7 @@
 ---====== Load spawner ======---
-
 local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
 
 ---====== Create entity ======---
-
 local entity = spawner.Create({
     Entity = {
         Name = "WH1T3",
@@ -24,7 +22,7 @@ local entity = spawner.Create({
     CameraShake = {
         Enabled = true,
         Range = 100,
-        Values = {10.5, 30, 1.1, 5} -- Magnitude, Roughness, FadeIn, FadeOut
+        Values = {10.5, 30, 1.1, 5}
     },
     Movement = {
         Speed = 350,
@@ -33,7 +31,7 @@ local entity = spawner.Create({
     },
     Rebounding = {
         Enabled = true,
-        Type = "Ambush", -- "Blitz"
+        Type = "Ambush",
         Min = 2,
         Max = 2,
         Delay = 0
@@ -50,26 +48,25 @@ local entity = spawner.Create({
         Break = true
     },
     Death = {
-        Type = "Guiding", -- "Curious"
+        Type = "Guiding",
         Hints = {"H̷̡̡̧̻̼̺̖̫̰̥͚̳͎̣͓͕̼̜̆͐ͅ0̷͇̦̬̟̱̣̠̼̻̱̩̲͇̥̪̙͎̩̈́̌́̈́̓̀̿̍͜Ẃ̵̛̛̏͑̔̏̿͊͐̆̋̈͐̐͘͜", "H̷̡̡̧̻̼̺̖̫̰̥͚̳͎̣͓͕̼̜̆͐ͅ0̷͇̦̬̟̱̣̠̼̻̱̩̲͇̥̪̙͎̩̈́̌́̈́̓̀̿̍͜Ẃ̵̛̛̏͑̔̏̿͊͐̆̋̈͐̐͘͜", "H̷̡̡̧̻̼̺̖̫̰̥͚̳͎̣͓͕̼̜̆͐ͅ0̷͇̦̬̟̱̣̠̼̻̱̩̲͇̥̪̙͎̩̈́̌́̈́̓̀̿̍͜Ẃ̵̛̛̏͑̔̏̿͊͐̆̋̈͐̐͘͜", "H̷̡̡̧̻̼̺̖̫̰̥͚̳͎̣͓͕̼̜̆͐ͅ0̷͇̦̬̟̱̣̠̼̻̱̩̲͇̥̪̙͎̩̈́̌́̈́̓̀̿̍͜Ẃ̵̛̛̏͑̔̏̿͊͐̆̋̈͐̐͘͜"},
         Cause = ""
     }
 })
 
 ---====== Debug entity ======---
-
 entity:SetCallback("OnSpawned", function()
     local sound = Instance.new("Sound")
-sound.SoundId = "rbxassetid://131489490"
-sound.Looped = false
-sound.Parent = workspace
-sound.Volume = 3.1
-sound:Play()
+    sound.SoundId = "rbxassetid://131489490"
+    sound.Looped = false
+    sound.Parent = workspace
+    sound.Volume = 3.1
+    sound:Play()
 
-sound.Ended:Connect(function()
-    wait(1)
-    sound:Destroy()
-end)
+    sound.Ended:Connect(function()
+        wait(1)
+        sound:Destroy()
+    end)
 
     local function getMainColorCorrection()
         local light = game:GetService("Lighting")
@@ -115,6 +112,5 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
         game:Shutdown()
     end
 end)
----====== Run entity ======---
 
 entity:Run()
