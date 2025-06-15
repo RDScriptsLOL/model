@@ -1,0 +1,79 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local function safeGetObjects(id)
+    local success, result = pcall(function()
+        return game:GetObjects("rbxassetid://"..id)
+    end)
+    return success and result or nil
+end
+
+game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+local LatestRoom = ReplicatedStorage.GameData.LatestRoom.Value
+local Rooms = Workspace.CurrentRooms:FindFirstChild(tostring(LatestRoom)) 
+local OGNodes = Rooms and Rooms:FindFirstChild("PathfindNodes")
+
+if OGNodes then
+    local NewNodes = OGNodes:Clone()
+    NewNodes.Parent = Rooms
+    NewNodes.Name = "Nodes"
+end
+
+require(LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("I must crouch", true)
+task.wait(0.5)
+
+local eyesAssets = safeGetObjects("125171553498127")
+if not eyesAssets or #eyesAssets == 0 then
+    return
+end
+
+local eyes = eyesAssets[1]
+local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local humanoid = character:FindFirstChildOfClass("Humanoid")
+local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+local currentLoadedRoom = Workspace.CurrentRooms[LatestRoom]
+local num = math.floor(#currentLoadedRoom.Nodes:GetChildren() / 2)
+
+eyes.CFrame = (num == 0 and currentLoadedRoom.Base or currentLoadedRoom.Nodes[num]).CFrame + Vector3.new(0, 10, 0)
+eyes.Parent = workspace
+
+local success, ModuleEvents = pcall(function()
+    return require(ReplicatedStorage.ClientModules.Module_Events)
+end)
+
+if success then
+    ModuleEvents.shatter(currentLoadedRoom)
+end
+
+ReplicatedStorage.GameData.LatestRoom.Changed:Connect(function()
+    if eyes and eyes.Parent then
+        eyes:Destroy()
+    end
+end)
+
+local lastPosition = humanoidRootPart.Position
+local enableDamage = true
+
+while enableDamage and Workspace:FindFirstChild("Silence") do
+    local currentPosition = humanoidRootPart.Position
+    local isMoving = (currentPosition - lastPosition).Magnitude > 0.1
+    local isCrouching = character:GetAttribute("Crouching") or false
+    
+    if isMoving and not isCrouching then
+        humanoid.Health -= 5
+        if humanoid.Health <= 0 then
+            ReplicatedStorage.GameStats["Player_"..LocalPlayer.Name].Total.DeathCause.Value = "Silence"
+            firesignal(ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, {
+                "You died to Silence",
+                "You should keep quiet",
+                "It needs quiet"
+            }, "Blue")
+            break
+        end
+    end
+    
+    lastPosition = currentPosition
+    task.wait(1)
+end
