@@ -1,201 +1,334 @@
-local currentHighlights = {}
-local rushIndicator = nil
-local ambushIndicator = nil
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
-local function clearAllHighlights()
-    for _, highlight in pairs(currentHighlights) do
-        if highlight and highlight.Parent then
-            highlight:Destroy()
+local function FileSound(SoundName, Link)
+    local FileExtension = Link:match("%.(%w+)$") or "mp3"
+    local FilePath = SoundName.."."..FileExtension
+    
+    if not isfile(FilePath) then
+        local Success, Content = pcall(function()
+            return game:HttpGet(Link)
+        end)
+        
+        if not Success then
+            warn("Failed to download sound: "..Content)
+            return nil
         end
+        
+        writefile(FilePath, Content)
     end
-    currentHighlights = {}
+
+    local Sound = Instance.new("Sound", workspace)
+    Sound.Name = SoundName or "Sound"
+    Sound.SoundId = getcustomasset(FilePath)
+    Sound:Play()
+    
+    return Sound
 end
 
-local function highlight(model)
-    if model then
-        local existingHighlight = model:FindFirstChildOfClass("Highlight")
-        if existingHighlight then
-            existingHighlight:Destroy()
-        end
-        local h = Instance.new("Highlight")
-        h.Parent = model
-        h.FillTransparency = 1
-        h.OutlineTransparency = 0
-        table.insert(currentHighlights, h)
-    end
-end
+local CameraShaker = require(ReplicatedStorage.CameraShaker)
+local camara = workspace.CurrentCamera
+local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+    camara.CFrame = camara.CFrame * shakeCf
+end)
 
-local function highlightAllInstances(instanceName)
-    local instances = game.Workspace:FindFirstChild(instanceName, true)
-    if instances then
-        if instances.Name == instanceName then
-            highlight(instances)
-        else
-            for _, child in pairs(instances:GetDescendants()) do
-                if child.Name == instanceName then
-                    highlight(child)
+local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
+
+local entity = spawner.Create({
+    Entity = {
+        Name = "A-60",
+        Asset = "12263106166",
+        HeightOffset = 0.5
+    },
+    Lights = {
+        Flicker = {
+            Enabled = false,
+            Duration = 80
+        },
+        Shatter = true,
+        Repair = false
+    },
+    Earthquake = {
+        Enabled = false
+    },
+    CameraShake = {
+        Enabled = true,
+        Range = 50,
+        Values = {30, 30, 0.1, 1}
+    },
+    Movement = {
+        Speed = 350,
+        Delay = 3,
+        Reversed = false
+    },
+    Rebounding = {
+        Enabled = true,
+        Type = "Ambush",
+        Min = 4,
+        Max = 4,
+        Delay = 0.05
+    },
+    Damage = {
+        Enabled = false,
+        Range = 40,
+        Amount = 125
+    },
+    Crucifixion = {
+        Enabled = false,
+        Range = 40,
+        Resist = false,
+        Break = false
+    },
+    Death = {
+        Type = "Guiding",
+        Hints = {"You died to The Multi Monster", "It can Appear at any moment, a loud scream will anounce its presence", "When you hear it spawn you must stay out of its reach as soon as possible", "It knows exactly where you are so hiding in different places will not work.."},
+        Cause = ""
+    }
+})
+
+entity:SetCallback("OnSpawned", function()
+    local function Kill()
+        local Player = Players.LocalPlayer
+        local Char = Player.Character or Player.CharacterAdded:Wait()
+        local Humanoid = Char:FindFirstChildOfClass("Humanoid")
+        
+        local ScreenGui = Instance.new("ScreenGui")
+        local JumpscareEnd = Instance.new("ImageLabel") 
+        local Full = Instance.new("ImageLabel")
+    
+        ScreenGui.Parent = Player:WaitForChild("PlayerGui")
+        ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    
+        JumpscareEnd.Name = "JumpscareEnd"
+        JumpscareEnd.Parent = ScreenGui
+        JumpscareEnd.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        JumpscareEnd.BackgroundTransparency = 1.000
+        JumpscareEnd.Position = UDim2.new(0.468161434, 0, 0.455128193, 0)
+        JumpscareEnd.Size = UDim2.new(0.0636771321, 0, 0.0884615406, 0)
+        JumpscareEnd.Image = ""
+        JumpscareEnd.ImageColor3 = Color3.fromRGB(255, 0, 4)
+    
+        Full.Name = "Full"
+        Full.Parent = ScreenGui
+        Full.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        Full.BackgroundTransparency = 1.000
+        Full.Position = UDim2.new(-0.0609865487, 0, -0.224358946, 0)
+        Full.Size = UDim2.new(1.12197304, 0, 1.44743586, 0)
+        Full.Image = "http://www.roblox.com/asset/?id=11151804223"
+        Full.ImageTransparency = 1.000
+    
+        local function DKITLS_fake_script()
+            local Script = Instance.new('LocalScript', ScreenGui)
+            local Gui = Script.Parent
+            local Plr = Players.LocalPlayer
+            local Char = Plr.Character
+            local Hum = Char:FindFirstChildOfClass("Humanoid")
+            local AB60 = workspace:FindFirstChild("A-60")
+            local Camera = workspace.CurrentCamera
+            local CameraShaker = require(ReplicatedStorage.CameraShaker)
+            local CamShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(cf)
+                Camera.CFrame = Camera.CFrame * cf
+            end)
+    
+            CamShake:Start()
+            local Jumpscaring = true
+            local Monster1 = AB60:FindFirstChild("RushNew"):Clone()
+            
+            local function ImageChange(Part)
+                spawn(function()
+                    while RunService.Heartbeat:Wait() do
+                        if RushNew:FindFirstChild("IMAGEIDS") then
+                            local get = RushNew.IMAGEIDS:GetChildren()
+                            local Randome = get[math.random(1,#Get)]
+                            Part.Main.Face.Texture = Randome.Image
+                            wait(Random.new():NextNumber(0,0.02))
+                        end
+                    end
+                end)
+            end
+    
+            Monster1.Parent = Camera 
+            ImageChange(Monster1) 
+            Monster1.Name = "A-60_SCARE"
+            
+            for _,v in pairs(Monster1:GetDescendants()) do
+                if v:IsA("Sound") then v:Destroy() end 
+            end
+            
+            local EntityOffset = Vector3.new(0,-1.2,-5)
+            local LerpAlpha = 0.8
+            local JumpscareSound
+            local JumpscareSound = FileSound("Sound", "https://github.com/RDScriptsLOL/model/raw/refs/heads/main/jj09p-7fam2.mp3")
+            JumpscareSound.Volume = 6
+            CamShake:ShakeOnce(25,25,0,4,90,60)
+            
+            local JumpscareContrast = Instance.new("ColorCorrectionEffect",game:GetService("Lighting"))
+            game:GetService("TweenService"):Create(JumpscareContrast,TweenInfo.new(0.5),{
+                Brightness = 0.2,
+                Contrast = 0.2,
+                Saturation = -0.2,
+                TintColor = Color3.fromRGB(255, 0, 4)
+            }):Play()
+            
+            spawn(function()
+                while Jumpscaring do 
+                    RunService.RenderStepped:Wait()
+                    Monster1.CFrame = Monster1.CFrame:Lerp(Camera.CFrame*CFrame.new(EntityOffset),LerpAlpha)
                 end
+                game:GetService("TweenService"):Create(Monster1,TweenInfo.new(1),{
+                    CFrame = Camera.CFrame*CFrame.new(Vector3.new(0,-1.2,45))
+                }):Play()
+            end)
+            
+            wait(0.5)
+            Jumpscaring = false
+            Gui.JumpscareEnd.Image = Monster1.Main.Face.Texture
+            game:GetService("TweenService"):Create(Gui.JumpscareEnd,TweenInfo.new(0.5),{
+                Size = Gui.Full.Size,
+                Position = Gui.Full.Position,
+                Rotation = math.random(-20,20)
+            }):Play()
+            
+            game:GetService("TweenService"):Create(JumpscareContrast,TweenInfo.new(10),{
+                Brightness = 0,
+                Contrast = 0,
+                Saturation = 0,
+                TintColor = Color3.fromRGB(255, 255, 255)
+            }):Play()
+            
+            Humanoid:TakeDamage(100)
+            ReplicatedStorage.GameStats["Player_"..Plr.Name].Total.DeathCause.Value = "The Multi Monster"
+            firesignal(ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, {
+                "You died to The Multi Monster",
+                "It can Appear at any moment, a loud scream will anounce its presence",
+                "When you hear it spawn you must stay out of its reach as soon as possible",
+                "It knows exactly where you are so hiding in different places will not work.."
+            },"Blue")
+            
+            wait(0.5)
+            game:GetService("TweenService"):Create(Gui.JumpscareEnd,TweenInfo.new(0.5),{
+                ImageTransparency = 1
+            }):Play()
+            game:GetService("Debris"):AddItem(Monster1,1)
+        end
+        coroutine.wrap(DKITLS_fake_script)()
+    end
+    
+    local AF60 = workspace:FindFirstChild("A-60")
+    if AF60 then
+        local RushNew = AF60:FindFirstChild("RushNew")
+        if RushNew then
+            local deb = false
+            local function canSeeTarget(target, size)
+                if deb then return false end
+                if workspace:FindFirstChild("SeekMovingNewClone") then return false end
+                
+                local origin = RushNew.Position
+                local direction = (target.HumanoidRootPart.Position - origin).unit * size
+                local ray = Ray.new(origin, direction)
+                local hit, pos = workspace:FindPartOnRay(ray, RushNew)
+            
+                if hit and hit:IsDescendantOf(target) then
+                    deb = true
+                    for _, v in pairs(RushNew:GetDescendants()) do
+                        if v:IsA("Sound") then v:Destroy() end
+                    end
+                    Kill()
+                    return true
+                end
+                return false
+            end
+            
+            local spawned = true
+            
+            spawn(function()
+                while spawned do 
+                    wait(0.5)
+                    local v = Players.LocalPlayer
+                    if v.Character ~= nil and not v.Character:GetAttribute("Hiding") then
+                        canSeeTarget(v.Character,50)
+                    end
+                end
+            end)
+            
+            spawn(function()
+                RushNew.Static:Play()
+                RushNew.Static.Pitch = 1.6
+                while RunService.Heartbeat:Wait() and spawned do
+                    if RushNew:FindFirstChild("IMAGEIDS") then
+                        local get = RushNew.IMAGEIDS:GetChildren()
+                        local random = get[math.random(1,#get)]
+                        RushNew.Main.Face.Texture = random.Image
+                        wait(Random.new():NextNumber(0,0.07))
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+entity:SetCallback("OnDespawning", function()
+    local EntityInstance = workspace:FindFirstChild("A-60")
+    if EntityInstance then
+        EntityInstance:Destroy()
+    end
+    
+    local Snd = Instance.new("Sound")
+    Snd.Volume = 1
+    Snd.Pitch = 0.1
+    Snd.SoundId = "rbxassetid://7757472223"
+    Snd.Parent = workspace
+    Snd.Volume = 10
+    Snd:Play()
+    
+    spawn(function()
+        while Snd.Playing do 
+            wait(0.5)
+            if Players.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid").Health == 0 then
+                Snd:Destroy()
             end
         end
-    end
-end
+    end)
 
-local function createRushIndicator(rushModel)
-    if not rushModel then return end
-    
-    if rushIndicator and rushIndicator.Parent then
-        return
-    end
-    
-    local attachment = rushModel:FindFirstChild("Attachment", true)
-    if not attachment then
-        attachment = Instance.new("Attachment")
-        attachment.Name = "RushIndicatorAttachment"
-        attachment.Parent = rushModel.PrimaryPart or rushModel:FindFirstChildWhichIsA("BasePart")
-    end
-    
-    local billboardGui = Instance.new("BillboardGui")
-    billboardGui.Name = "RushIndicator"
-    billboardGui.Size = UDim2.new(10, 0, 10, 0)
-    billboardGui.AlwaysOnTop = true
-    billboardGui.LightInfluence = 1
-    billboardGui.MaxDistance = 100000
-    billboardGui.Parent = attachment
-    
-    local imageLabel = Instance.new("ImageLabel")
-    imageLabel.Name = "IndicatorImage"
-    imageLabel.Size = UDim2.new(0.8, 0, 0.8, 0)
-    imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-    imageLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
-    imageLabel.BackgroundTransparency = 0
-    imageLabel.Image = "rbxassetid://6842825462"
-    imageLabel.BackgroundColor3 = Color3.new(0, 0, 0)
-    imageLabel.Parent = billboardGui
-    
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(1, 0)
-    UICorner.Parent = imageLabel
-    
-    rushIndicator = billboardGui
-end
+    local Reboundcolor = Instance.new("ColorCorrectionEffect",game.Lighting)
+    Reboundcolor.Name = "Despawn"
+    Reboundcolor.TintColor = Color3.fromRGB(255, 0, 4)
+    Reboundcolor.Saturation = -0.7
+    Reboundcolor.Contrast = 0.2
+    game:GetService("TweenService"):Create(Reboundcolor,TweenInfo.new(15),{
+        TintColor = Color3.fromRGB(255, 255, 255),
+        Saturation = 0, 
+        Contrast = 0
+    }):Play()
 
-local function createAmbushIndicator(ambushModel)
-    if not ambushModel then return end
-    
-    if ambushIndicator and ambushIndicator.Parent then
-        return
-    end
-    
-    local attachment = ambushModel:FindFirstChild("Attachment", true)
-    if not attachment then
-        attachment = Instance.new("Attachment")
-        attachment.Name = "AmbushIndicatorAttachment"
-        attachment.Parent = ambushModel.PrimaryPart or ambushModel:FindFirstChildWhichIsA("BasePart")
-    end
-    
-    local billboardGui = Instance.new("BillboardGui")
-    billboardGui.Name = "AmbushIndicator"
-    billboardGui.Size = UDim2.new(10, 0, 10, 0)
-    billboardGui.AlwaysOnTop = true
-    billboardGui.LightInfluence = 1
-    billboardGui.MaxDistance = 100000
-    billboardGui.Parent = attachment
-    
-    local imageLabel = Instance.new("ImageLabel")
-    imageLabel.Name = "IndicatorImage"
-    imageLabel.Size = UDim2.new(0.8, 0, 0.8, 0)
-    imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-    imageLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
-    imageLabel.BackgroundTransparency = 0
-    imageLabel.Image = "rbxassetid://10110576663"
-    imageLabel.BackgroundColor3 = Color3.new(0, 0, 0)
-    imageLabel.Parent = billboardGui
-    
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(1, 0)
-    UICorner.Parent = imageLabel
-    
-    ambushIndicator = billboardGui
-end
-
-local function updateHighlights()
-    local currentLatestRoom = game.ReplicatedStorage.GameData.LatestRoom.Value
-    
-    local currentRoom = game.Workspace.CurrentRooms[currentLatestRoom]
-    if currentRoom then
-        local currentDoor = currentRoom.Door:FindFirstChild("Door", true)
-        highlight(currentDoor)
-    end
-    
-    highlightAllInstances("LeverForGate")
-    highlightAllInstances("KeyObtain")
-    
-    for _, figure in pairs(game.Workspace:GetDescendants()) do
-        if figure.Name == "FigureRig" then
-            highlight(figure)
+    local volumeTween = game:GetService("TweenService"):Create(Snd, TweenInfo.new(23), {Volume = 0})
+    volumeTween:Play()
+    volumeTween.Completed:Connect(function()
+        if Snd.Volume == 0 then
+            Snd:Destroy()
         end
-    end
-    
-    for _, hintBook in pairs(game.Workspace:GetDescendants()) do
-        if hintBook.Name == "LiveHintBook" then
-            highlight(hintBook)
-        end
-    end
+    end)
+    local cameraShaker = require(ReplicatedStorage.CameraShaker)
+    local camera = workspace.CurrentCamera
 
-    local rushMoving = game.Workspace:FindFirstChild("RushMoving")
-    if rushMoving then
-        local rushNew = rushMoving:FindFirstChild("RushNew")
-        if rushNew then
-            createRushIndicator(rushNew)
-        end
-    end
-    
-    local ambushMoving = game.Workspace:FindFirstChild("AmbushMoving")
-    if ambushMoving then
-        createAmbushIndicator(ambushMoving)
-    end
-end
+    local camShake = cameraShaker.new(Enum.RenderPriority.Camera.Value, function(cf)
+        camera.CFrame = camera.CFrame * cf
+    end)
+    camShake:Start()
+    camShake:ShakeOnce(5,45,0.1,20,2,20)
 
-local debounce = false
-local function onRoomChanged()
-    if not debounce then
-        debounce = true
-        clearAllHighlights()
-        updateHighlights()
-        wait(0.5)
-        debounce = false
+    local humanoid = Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if humanoid and humanoid.Health > 0 and not isfile("A60.txt") then
+        local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
+        achievementGiver({
+            Title = "A nostalgic fright...",
+            Desc = "Might Come back...",
+            Reason = "Encounter and survive the rare Entity called The Multi Monster",
+            Image = "rbxassetid://102084309341302"
+        })
+        writefile("A60.txt", "Might Come back...")
     end
-end
+end)
 
-local function monitorEntities()
-    while true do
-        local rushMoving = game.Workspace:FindFirstChild("RushMoving")
-        if rushMoving then
-            local rushNew = rushMoving:FindFirstChild("RushNew")
-            if rushNew then
-                createRushIndicator(rushNew)
-            end
-        else
-            if rushIndicator then
-                rushIndicator:Destroy()
-                rushIndicator = nil
-            end
-        end
-        
-        local ambushMoving = game.Workspace:FindFirstChild("AmbushMoving")
-        if ambushMoving then
-            createAmbushIndicator(ambushMoving)
-        else
-            if ambushIndicator then
-                ambushIndicator:Destroy()
-                ambushIndicator = nil
-            end
-        end
-        
-        wait(0.5)
-    end
-end
-
-onRoomChanged()
-game.ReplicatedStorage.GameData.LatestRoom.Changed:Connect(onRoomChanged)
-spawn(monitorEntities)
+entity:Run()
