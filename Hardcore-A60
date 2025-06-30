@@ -1,0 +1,201 @@
+local currentHighlights = {}
+local rushIndicator = nil
+local ambushIndicator = nil
+
+local function clearAllHighlights()
+    for _, highlight in pairs(currentHighlights) do
+        if highlight and highlight.Parent then
+            highlight:Destroy()
+        end
+    end
+    currentHighlights = {}
+end
+
+local function highlight(model)
+    if model then
+        local existingHighlight = model:FindFirstChildOfClass("Highlight")
+        if existingHighlight then
+            existingHighlight:Destroy()
+        end
+        local h = Instance.new("Highlight")
+        h.Parent = model
+        h.FillTransparency = 1
+        h.OutlineTransparency = 0
+        table.insert(currentHighlights, h)
+    end
+end
+
+local function highlightAllInstances(instanceName)
+    local instances = game.Workspace:FindFirstChild(instanceName, true)
+    if instances then
+        if instances.Name == instanceName then
+            highlight(instances)
+        else
+            for _, child in pairs(instances:GetDescendants()) do
+                if child.Name == instanceName then
+                    highlight(child)
+                end
+            end
+        end
+    end
+end
+
+local function createRushIndicator(rushModel)
+    if not rushModel then return end
+    
+    if rushIndicator and rushIndicator.Parent then
+        return
+    end
+    
+    local attachment = rushModel:FindFirstChild("Attachment", true)
+    if not attachment then
+        attachment = Instance.new("Attachment")
+        attachment.Name = "RushIndicatorAttachment"
+        attachment.Parent = rushModel.PrimaryPart or rushModel:FindFirstChildWhichIsA("BasePart")
+    end
+    
+    local billboardGui = Instance.new("BillboardGui")
+    billboardGui.Name = "RushIndicator"
+    billboardGui.Size = UDim2.new(10, 0, 10, 0)
+    billboardGui.AlwaysOnTop = true
+    billboardGui.LightInfluence = 1
+    billboardGui.MaxDistance = 100000
+    billboardGui.Parent = attachment
+    
+    local imageLabel = Instance.new("ImageLabel")
+    imageLabel.Name = "IndicatorImage"
+    imageLabel.Size = UDim2.new(0.8, 0, 0.8, 0)
+    imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+    imageLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+    imageLabel.BackgroundTransparency = 0
+    imageLabel.Image = "rbxassetid://6842825462"
+    imageLabel.BackgroundColor3 = Color3.new(0, 0, 0)
+    imageLabel.Parent = billboardGui
+    
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(1, 0)
+    UICorner.Parent = imageLabel
+    
+    rushIndicator = billboardGui
+end
+
+local function createAmbushIndicator(ambushModel)
+    if not ambushModel then return end
+    
+    if ambushIndicator and ambushIndicator.Parent then
+        return
+    end
+    
+    local attachment = ambushModel:FindFirstChild("Attachment", true)
+    if not attachment then
+        attachment = Instance.new("Attachment")
+        attachment.Name = "AmbushIndicatorAttachment"
+        attachment.Parent = ambushModel.PrimaryPart or ambushModel:FindFirstChildWhichIsA("BasePart")
+    end
+    
+    local billboardGui = Instance.new("BillboardGui")
+    billboardGui.Name = "AmbushIndicator"
+    billboardGui.Size = UDim2.new(10, 0, 10, 0)
+    billboardGui.AlwaysOnTop = true
+    billboardGui.LightInfluence = 1
+    billboardGui.MaxDistance = 100000
+    billboardGui.Parent = attachment
+    
+    local imageLabel = Instance.new("ImageLabel")
+    imageLabel.Name = "IndicatorImage"
+    imageLabel.Size = UDim2.new(0.8, 0, 0.8, 0)
+    imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+    imageLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+    imageLabel.BackgroundTransparency = 0
+    imageLabel.Image = "rbxassetid://10110576663"
+    imageLabel.BackgroundColor3 = Color3.new(0, 0, 0)
+    imageLabel.Parent = billboardGui
+    
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(1, 0)
+    UICorner.Parent = imageLabel
+    
+    ambushIndicator = billboardGui
+end
+
+local function updateHighlights()
+    local currentLatestRoom = game.ReplicatedStorage.GameData.LatestRoom.Value
+    
+    local currentRoom = game.Workspace.CurrentRooms[currentLatestRoom]
+    if currentRoom then
+        local currentDoor = currentRoom.Door:FindFirstChild("Door", true)
+        highlight(currentDoor)
+    end
+    
+    highlightAllInstances("LeverForGate")
+    highlightAllInstances("KeyObtain")
+    
+    for _, figure in pairs(game.Workspace:GetDescendants()) do
+        if figure.Name == "FigureRig" then
+            highlight(figure)
+        end
+    end
+    
+    for _, hintBook in pairs(game.Workspace:GetDescendants()) do
+        if hintBook.Name == "LiveHintBook" then
+            highlight(hintBook)
+        end
+    end
+
+    local rushMoving = game.Workspace:FindFirstChild("RushMoving")
+    if rushMoving then
+        local rushNew = rushMoving:FindFirstChild("RushNew")
+        if rushNew then
+            createRushIndicator(rushNew)
+        end
+    end
+    
+    local ambushMoving = game.Workspace:FindFirstChild("AmbushMoving")
+    if ambushMoving then
+        createAmbushIndicator(ambushMoving)
+    end
+end
+
+local debounce = false
+local function onRoomChanged()
+    if not debounce then
+        debounce = true
+        clearAllHighlights()
+        updateHighlights()
+        wait(0.5)
+        debounce = false
+    end
+end
+
+local function monitorEntities()
+    while true do
+        local rushMoving = game.Workspace:FindFirstChild("RushMoving")
+        if rushMoving then
+            local rushNew = rushMoving:FindFirstChild("RushNew")
+            if rushNew then
+                createRushIndicator(rushNew)
+            end
+        else
+            if rushIndicator then
+                rushIndicator:Destroy()
+                rushIndicator = nil
+            end
+        end
+        
+        local ambushMoving = game.Workspace:FindFirstChild("AmbushMoving")
+        if ambushMoving then
+            createAmbushIndicator(ambushMoving)
+        else
+            if ambushIndicator then
+                ambushIndicator:Destroy()
+                ambushIndicator = nil
+            end
+        end
+        
+        wait(0.5)
+    end
+end
+
+onRoomChanged()
+game.ReplicatedStorage.GameData.LatestRoom.Changed:Connect(onRoomChanged)
+spawn(monitorEntities)
