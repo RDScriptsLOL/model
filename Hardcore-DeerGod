@@ -1,0 +1,152 @@
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:FindFirstChildOfClass("Humanoid")
+local gameStats = game.ReplicatedStorage:WaitForChild("GameStats")
+local TweenService = game:GetService("TweenService")
+local ChaseSound
+
+local function FileSound(SoundName, Link)
+    local FileExtension = Link:match("%.(%w+)$") or "mp3"
+    local FilePath = SoundName.."."..FileExtension
+    
+    if not isfile(FilePath) then
+        local Success, Content = pcall(function()
+            return game:HttpGet(Link)
+        end)
+        
+        if not Success then
+            warn("Failed to download sound: "..Content)
+            return nil
+        end
+        
+        writefile(FilePath, Content)
+    end
+
+    local Sound = Instance.new("Sound", workspace)
+    Sound.Name = SoundName or "Sound"
+    Sound.SoundId = getcustomasset(FilePath)
+    Sound:Play()
+    
+    return Sound
+end
+
+local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
+local camara = workspace.CurrentCamera
+local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+    camara.CFrame = camara.CFrame * shakeCf
+end)
+
+local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
+
+local entity = spawner.Create({
+    Entity = {
+        Name = "Deer God",
+        Asset = "12262883448",
+        HeightOffset = 0
+    },
+    Lights = {
+        Flicker = {
+            Enabled = true,
+            Duration = 80
+        },
+        Shatter = true,
+        Repair = false
+    },
+    Earthquake = {
+        Enabled = true
+    },
+    CameraShake = {
+        Enabled = true,
+        Range = 10,
+        Values = {5, 15, 0.1, 1}
+    },
+    Movement = {
+        Speed = 25,
+        Delay = 0,
+        Reversed = false
+    },
+    Rebounding = {
+        Enabled = false,
+        Type = "Ambush",
+        Min = 1,
+        Max = 1,
+        Delay = 2
+    },
+    Damage = {
+        Enabled = true,
+        Range = 40,
+        Amount = 125
+    },
+    Crucifixion = {
+        Enabled = false,
+        Range = 40,
+        Resist = false,
+        Break = true
+    },
+    Death = {
+        Type = "Guiding",
+        Hints = {"You died to whom you call The Deer God","Closets Wont work! So try running","Its form is incomprehensible to a human upclose...","..so avoid Eye Contact"},
+        Cause = ""
+    }
+})
+
+entity:SetCallback("OnSpawned", function()
+    ChaseSound = FileSound("Deer God","https://github.com/RDScriptsLOL/model/raw/refs/heads/main/Deergod.ogg")
+    if ChaseSound then
+        ChaseSound.Volume = 1
+        ChaseSound.Looped = true
+        TweenService:Create(ChaseSound, TweenInfo.new(5), {Volume = 0.7}):Play()
+    end
+    
+    camShake:Start()
+    camShake:ShakeOnce(5, 15, 0.1, 1)
+end)
+
+entity:SetCallback("OnLookAt", function(lineOfSight)
+    if lineOfSight then
+        task.wait(1)
+        if humanoid and humanoid.Health > 0 then
+            humanoid.Health = humanoid.Health - 5
+            if humanoid.Health <= 0 then
+                firesignal(
+                    game.ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, 
+                    {
+                        "You died to whom you call The Deer God",
+                        "Closets Wont work! So try running",
+                        "Its form is incomprehensible to a human upclose...",
+                        "..so avoid Eye Contact"
+                    },
+                    "Blue"
+                )
+                gameStats["Player_"..player.Name].Total.DeathCause.Value = "Deer God"
+            end
+        end
+    end
+end)
+
+entity:SetCallback("OnDespawning", function()
+    local EntityInstance = game.workspace:FindFirstChild("Deer God")
+    if EntityInstance then
+        EntityInstance:Destroy()
+    end
+
+    if ChaseSound then
+        TweenService:Create(ChaseSound, TweenInfo.new(5), {Volume = 0}):Play()
+        task.wait(5)
+        ChaseSound:Destroy()
+        ChaseSound = nil
+    end
+
+    if humanoid and humanoid.Health > 0 and not isfile("Deer God.txt") then
+        local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
+        achievementGiver({
+            Title = "Last Chance To Look Away",
+            Desc = "Why are you running?",
+            Reason = "Survive the rare Entity called Deer God",
+            Image = "rbxassetid://109932336861800"
+        })
+        writefile("Deer God.txt", "Why are you running?")
+    end
+end)
+
+entity:Run()
