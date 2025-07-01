@@ -1,0 +1,331 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Workspace = game:GetService("Workspace")
+
+local sillybilly = {8482795900, 236542974, 184251462, 236777652}
+
+local renderConnection = nil
+local isViewLocked = false
+local die = false
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local cameraShaker = require(game.ReplicatedStorage.CameraShaker)
+local camera = workspace.CurrentCamera
+local camShake = cameraShaker.new(Enum.RenderPriority.Camera.Value, function(cf)
+    camera.CFrame = camera.CFrame * cf
+end)
+
+local killed = false
+local imageCycleActive = false
+local redtweeninfo = TweenInfo.new(3)
+local redinfo = {Color = Color3.new(1, 0, 0.133333)}
+
+local function isPlayerNearRipper(ripperPart, radius)
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local hidingStatus = character:GetAttribute("Hiding")
+            if hidingStatus == nil or hidingStatus == false then
+                die = true
+                local distance = (player.Character.HumanoidRootPart.Position - ripperPart.Position).Magnitude
+                if distance <= radius then
+                    return true
+                end
+            end
+        end
+    end
+    return false
+end
+
+local function FileSound(SoundName, Link)
+    local FileExtension = Link:match("%.(%w+)$") or "mp3"
+    local FilePath = SoundName.."."..FileExtension
+    
+    if not isfile(FilePath) then
+        local Success, Content = pcall(function()
+            return game:HttpGet(Link)
+        end)
+        
+        if not Success then
+            warn("Failed to download sound: "..Content)
+            return nil
+        end
+        
+        writefile(FilePath, Content)
+    end
+
+    local Sound = Instance.new("Sound")
+    Sound.Parent = workspace
+    Sound.Name = SoundName or "Sound"
+    Sound.SoundId = getcustomasset(FilePath)
+    
+    return Sound
+end
+
+local function lockView()
+    if isViewLocked then return end
+    local RipperGUy = workspace:FindFirstChild("Ripper")
+    if RipperGUy then
+        local Ripper = RipperGUy:FindFirstChild("Ripe")
+        local ripperscare = Ripper:Clone()
+        ripperscare.Parent = workspace
+        ripperscare.Position = Ripper.Position
+        ripperscare.ripe.ParticleEmitter1.Texture = "rbxassetid://11816152645"
+        ripperscare.ripe.ParticleEmitter2:Destroy()
+        if Ripper then
+            for i,v in pairs(ripperscare:GetDescendants()) do
+                if v:IsA("ParticleEmitter") then
+                    spawn(function()
+                        v.Rate = 9999
+                        wait(0.25)
+                        v.TimeScale = 0.0
+                    end)
+                elseif v:IsA("Sound") then
+                    v.Volume = 0
+                end
+            end
+            RipperGUy:Destroy()
+            humanoid.WalkSpeed = 0
+            humanoid.JumpPower = 0
+            humanoid.RootPart.Anchored = true
+            camera.CameraType = Enum.CameraType.Scriptable
+            camera.CameraSubject = nil
+            isViewLocked = true
+            renderConnection = RunService.RenderStepped:Connect(function()
+                if targetPart and isViewLocked then
+                    local cameraPos = camera.CFrame.Position
+                    camera.CFrame = CFrame.new(cameraPos, RipeCc.Position)
+                end
+            end)
+        end
+    end
+end
+
+local function StartDeathSequence()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "RipperDeathUI"
+    screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    screenGui.IgnoreGuiInset = true
+    
+    local ImageLabel = Instance.new("ImageLabel")
+    ImageLabel.Size = UDim2.new(1, 0, 1, 0)
+    ImageLabel.BackgroundTransparency = 1
+    ImageLabel.Image = "rbxassetid://"..sillybilly[1]
+    ImageLabel.ImageTransparency = 1
+    ImageLabel.Parent = screenGui
+    
+    local charX = game.Players.LocalPlayer.Character
+    local static = Instance.new("Sound",workspace)
+    static.SoundId = "rbxassetid://372770465"
+    static.Volume = 10
+    static.Pitch = 0.7
+    local crash
+    crash = FileSound("crash", "https://github.com/RDScriptsLOL/model/raw/refs/heads/main/0701.MP3")
+    crash.Volume = 3
+    crash.Pitch = 1
+    local make = Instance.new("Part",workspace)
+    make.Transparency = 1
+    make.CanCollide = false
+    make.CanTouch = false
+    make.Anchored = true
+    make.Name = "pantspooper"
+    charX:FindFirstChild("HumanoidRootPart").Anchored = true
+    make.CFrame = workspace.Camera.CFrame
+    crash:Play()
+    workspace.Camera.CameraType = Enum.CameraType.Scriptable
+    imageCycleActive = true
+    local currentIndex = 1
+    local sceneing = true
+    local sceneing = true
+    local startTime = os.clock()
+    spawn(function()
+        while game["Run Service"].RenderStepped:Wait() and sceneing do
+            if os.clock() - startTime >= 6 then
+                sceneing = false
+                break
+            end
+            workspace.Camera.CFrame = make.CFrame
+            ImageLabel.Image = "rbxassetid://"..sillybilly[math.random(1,#sillybilly)]
+        end
+    end)
+    local t = TweenService:Create(make,TweenInfo.new(0.3,Enum.EasingStyle.Circular,Enum.EasingDirection.InOut),{CFrame = CFrame.lookAt(make.Position,workspace.Ripe.Position)})
+    t:Play()
+    t.Completed:Wait()
+    Wait(2)
+    TweenService:Create(ImageLabel,TweenInfo.new(2),{ImageTransparency = 0}):Play()
+    static:Play() 
+    static.Volume = 0 
+    TweenService:Create(static,TweenInfo.new(2),{Volume = 10}):Play()
+    task.wait(2)
+    TweenService:Create(ImageLabel,TweenInfo.new(1),{ImageTransparency = 1}):Play()
+    TweenService:Create(static,TweenInfo.new(1),{Volume = 0}):Play()
+    workspace.Ripe.Anchored = false
+    workspace.Ripe.CanCollide = false
+    charX:FindFirstChild("HumanoidRootPart").Anchored = false
+    local v = game.Players.LocalPlayer
+    v.Character:FindFirstChildWhichIsA("Humanoid"):TakeDamage(100)
+    ReplicatedStorage.GameStats["Player_"..v.Name].Total.DeathCause.Value = "Ripper"
+    firesignal(ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, { "You died to who you call Ripper...","You can tell his presence by the lights and his scream.","Hide when he does this!"},"Blue")
+    
+    if screenGui then
+        screenGui:Destroy()
+        screenGui = nil
+        effectImage = nil
+    end
+    imageCycleActive = false
+end
+
+local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
+local entity = spawner.Create({
+    Entity = {
+        Name = "Ripper",
+        Asset = "131333516619996",
+        HeightOffset = 8
+    },
+    Lights = {
+        Flicker = {
+            Enabled = false,
+            Duration = 80
+        },
+        Shatter = false,
+        Repair = false
+    },
+    Earthquake = {
+        Enabled = false
+    },
+    CameraShake = {
+        Enabled = true,
+        Range = 100,
+        Values = {5, 15, 0.1, 1}
+    },
+    Movement = {
+        Speed = 100,
+        Delay = 4.4,
+        Reversed = false
+    },
+    Rebounding = {
+        Enabled = false,
+        Type = "Ambush",
+        Min = 4,
+        Max = 4,
+        Delay = 0.05
+    },
+    Damage = {
+        Enabled = false,
+        Range = 40,
+        Amount = 99999
+    },
+    Crucifixion = {
+        Enabled = false,
+        Range = 40,
+        Resist = false,
+        Break = false
+    },
+    Death = {
+        Type = "Guiding",
+        Hints = {"You died to who you call Ripper...","You can tell his presence by the lights and his scream.","Hide when he does this!"},
+        Cause = ""
+    }
+})
+
+entity:SetCallback("OnSpawned", function()
+    for i,v in pairs(game.Workspace.CurrentRooms:GetDescendants()) do
+        if v:IsA("Light") then
+            game.TweenService:Create(v,redtweeninfo,redinfo):Play()
+            if v.Parent.Name == "LightFixture" then
+                game.TweenService:Create(v.Parent,redtweeninfo,redinfo):Play()
+            end
+        end
+    end
+    camShake:Start()
+    camShake:ShakeOnce(3,45,0.1,1,2,20)
+    local RipperGUy = workspace:FindFirstChild("Ripper")
+    if RipperGUy then
+        local ambush = RipperGUy:FindFirstChild("Ripe")
+        local amb = ambush.Spawn:Clone() 
+        amb.Parent = workspace
+        amb.TimePosition = 0
+        amb:Play()
+        amb.Looped = false
+        amb.Volume = 6
+        local ambush = RipperGUy:FindFirstChild("Ripe")
+        ambush.Ambush.SoundId = "rbxassetid://6963538865"
+        ambush.Ambush.Volume = 10
+        ambush.Ambush.RollOffMinDistance = 5
+        ambush.Ambush.PlaybackSpeed = 0.37
+        game.TweenService:Create(ambush.Ambush,TweenInfo.new(6),{Volume = 0.8}):Play()
+        Wait(5.771)
+        amb:Destroy()
+        spawn(function()
+            while RipperGUy and RipperGUy:FindFirstChild("Ripe") do
+                if isPlayerNearRipper(RipperGUy:FindFirstChild("Ripe"), 50) then
+                    local hidingStatus = character:GetAttribute("Hiding")
+                    if hidingStatus == nil or hidingStatus == false then
+                        local v = game.Players.LocalPlayer
+                        ReplicatedStorage.GameStats["Player_"..v.Name].Total.DeathCause.Value = "Ripper"
+                        firesignal(ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, { "You died to who you call Ripper...","You can tell his presence by the lights and his scream.","Hide when he does this!"},"Blue")
+                        die = true
+                        lockView()
+                        StartDeathSequence()
+                        local slam = Instance.new("Sound", workspace.Ripe)
+                        slam.Volume = 10
+                        slam.SoundId = "rbxassetid://1837829565"
+                        camShake:Shake(cameraShaker.Presets.Explosion)
+                        slam:Play()
+                        Wait(10)
+                        if workspace:FindFirstChild("Ripe") then
+                            workspace:FindFirstChild("Ripe"):Destroy()
+                        end
+                        if workspace:FindFirstChild("pantspooper") then
+                            workspace:FindFirstChild("pantspooper"):Destroy()
+                        end
+                        break
+                    end
+                end
+                wait(0.1)
+            end
+        end)
+    end
+end)
+
+entity:SetCallback("OnDespawning", function()
+    local hidingStatus = character:GetAttribute("Hiding")
+    if hidingStatus == nil or hidingStatus == false then
+        die = true
+        local RipperGUy = workspace:FindFirstChild("Ripper")
+        if RipperGUy then
+            local Plr = Players.LocalPlayer
+            lockView()
+            StartDeathSequence()
+            local slam = Instance.new("Sound", workspace.Ripe)
+            slam.Volume = 10
+            slam.SoundId = "rbxassetid://1837829565"
+            camShake:Shake(cameraShaker.Presets.Explosion)
+            slam:Play()
+            Wait(10)
+            if workspace:FindFirstChild("Ripe") then
+                workspace:FindFirstChild("Ripe"):Destroy()
+            end
+            if workspace:FindFirstChild("pantspooper") then
+                workspace:FindFirstChild("pantspooper"):Destroy()
+            end
+        end
+    end
+    local humanoid = Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if humanoid and humanoid.Health > 0 and not isfile("Ripper.txt") then
+        if die == false then
+        local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
+        achievementGiver({
+            Title = "Torn Apart",
+            Desc = "Dont leave to early..",
+            Reason = "Encounter Ripper.",
+            Image = "rbxassetid://102621889579119"
+        })
+        writefile("Ripper.txt", "Dont leave to early..")
+        end
+    end
+end)
+
+entity:Run()
