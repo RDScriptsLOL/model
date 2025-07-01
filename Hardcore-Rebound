@@ -136,7 +136,7 @@ function CreateReboundEntity(reversed, isLast)
             Delay = 0.05
         },
         Damage = {
-            Enabled = false,
+            Enabled = true,
             Range = 40,
             Amount = 99999
         },
@@ -182,7 +182,7 @@ entity:SetCallback("OnSpawned", function()
 end)
     
 entity:SetCallback("OnDespawning", function()
-        local EntityInstance = workspace:FindFirstChild("ReboundMoving")
+        local EntityInstance = workspace:FindFirstChild("Rebound")
         if EntityInstance then
             EntityInstance:Destroy()
         end
@@ -196,7 +196,7 @@ entity:SetCallback("OnDespawning", function()
                     Title = "Out Of Many Rebounds",
                     Desc = "Back for more!",
                     Reason = "Encounter Rebound.",
-                    Image = "rbxassetid://2129254734"
+                    Image = "rbxassetid://75213215339860"
                 })
                 writefile("Rebound.txt", "Back for more!")
             end
@@ -221,7 +221,7 @@ local function Entity(name)
     return false
 end
 
-if not Entity("ReboundMoving") or not Entity("SeekMovingNewClone") or not Entity("FigureRig") or not Entity("GrumbleRig") or not Entity("TrueSeek")then
+if not Entity("Rebound") or not Entity("SeekMovingNewClone") or not Entity("FigureRig") or not Entity("GrumbleRig") or not Entity("TrueSeek")then
     local reversed = true
     local maxSpawns = 6
     
@@ -230,7 +230,7 @@ if not Entity("ReboundMoving") or not Entity("SeekMovingNewClone") or not Entity
         local entity = CreateReboundEntity(reversed, isLast)
         entity:Run()
         
-        while Workspace:FindFirstChild("ReboundMoving") do
+        while Workspace:FindFirstChild("Rebound") do
             wait(0.1)
         end
         
