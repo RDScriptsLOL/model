@@ -133,6 +133,19 @@ entity:SetCallback("OnDespawning", function()
     if EntityInstance then
         EntityInstance:Destroy()
     end
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+    if humanoid and humanoid.Health > 0 and not isfile("Cease.txt") then
+        local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
+        achievementGiver({
+            Title = "Stop Now",
+            Desc = "Why are you just standing?",
+            Reason = "Survive the rare Entity called Cease",
+            Image = "rbxassetid://88002212742939"
+        })
+        writefile("Cease.txt", "Why are you just standing?")
+    end
 end)
 
 ---====== Run entity ======---
