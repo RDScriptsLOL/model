@@ -1,0 +1,143 @@
+local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
+local entity = spawner.Create({
+	Entity = {
+		Name = "Silence",
+		Asset = "12797525404",
+		HeightOffset = 0
+	},
+	Lights = {
+		Flicker = {
+			Enabled = false,
+			Duration = 1
+		},
+		Shatter = true,
+		Repair = false
+	},
+	Earthquake = {
+		Enabled = false
+	},
+	CameraShake = {
+		Enabled = true,
+		Range = 10,
+		Values = {5, 15, 0.1, 1}
+	},
+	Movement = {
+		Speed = 40,
+		Delay = 0,
+		Reversed = false
+	},
+	Rebounding = {
+		Enabled = false,
+		Type = "Ambush",
+		Min = 1,
+		Max = 1,
+		Delay = 2
+	},
+	Damage = {
+		Enabled = false,
+		Range = 40,
+		Amount = 99999
+	},
+	Crucifixion = {
+		Enabled = true,
+		Range = 40,
+		Resist = false,
+		Break = true
+	},
+	Death = {
+		Type = "Guiding",
+		Hints = {"You died to who you call Silence","Stay as silent as possible when you suspect its coming, so you know when to hide!","Its slow, but hard to hear","so hide!"},
+		Cause = ""
+	}
+})
+
+---====== Debug entity ======---
+
+entity:SetCallback("OnDespawning", function()
+     local EntityInstance = game.workspace:FindFirstChild("Silence")
+    if EntityInstance then
+        EntityInstance:Destroy()
+    end
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid and humanoid.Health > 0 and not isfile("Silence.txt") then
+        local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
+        achievementGiver({
+            Title = "Eyes Closed Ears open",
+            Desc = "Stay silent or I wont be heard",
+            Reason = "Encounter Silence",
+            Image = "rbxassetid://136466249805234"
+        })
+        writefile("Silence.txt", "Stay silent or I wont be heard")
+    end
+end)
+
+entity:SetCallback("OnDamagePlayer", function(newHealth)
+	if newHealth == 0 then
+        local player = game.Players.LocalPlayer
+        local screenGui = Instance.new("ScreenGui")
+        screenGui.Name = "FullScreenEffect"
+        screenGui.ResetOnSpawn = false
+        screenGui.IgnoreGuiInset = true
+        screenGui.Parent = player:WaitForChild("PlayerGui")
+        
+        local frame = Instance.new("Frame")
+        frame.Size = UDim2.new(1, 0, 1, 0)
+        frame.BackgroundColor3 = Color3.new(0, 0, 0)
+        frame.Parent = screenGui
+        
+        local Sound = Instance.new("Sound")
+        Sound.Parent = workspace
+        Sound.Volume = 1
+        Sound.SoundId = "rbxassetid://115595182796211"
+        
+        local image = Instance.new("ImageLabel")
+        image.Name = "EffectImage"
+        image.Size = UDim2.new(0.9, 0, 0.9, 0)
+        image.Position = UDim2.new(0.5, 0, 0.5, 0)
+        image.AnchorPoint = Vector2.new(0.5, 0.5)
+        image.BackgroundTransparency = 1
+        image.Image = "rbxassetid://11535704098"
+        image.ScaleType = Enum.ScaleType.Fit
+        image.Parent = frame
+        
+        local shakeIntensity = 50
+        local shakeSpeed = 100
+        
+        game:GetService("RunService").Heartbeat:Connect(function(dt)
+            local time = tick()
+            local offsetX = math.sin(time * shakeSpeed) * shakeIntensity
+            local offsetY = math.cos(time * shakeSpeed * 0.8) * shakeIntensity
+            image.Position = UDim2.new(0.5, offsetX, 0.5, offsetY)
+        end)
+        
+        local tweenService = game:GetService("TweenService")
+        local fadeTween = tweenService:Create(
+            frame,
+            TweenInfo.new(1, Enum.EasingStyle.Linear),
+            {BackgroundTransparency = 1}
+        )
+        
+        local imageFadeTween = tweenService:Create(
+            image,
+            TweenInfo.new(1, Enum.EasingStyle.Linear),
+            {ImageTransparency = 1}
+        )
+        
+        Sound:Play()
+        task.wait(1)
+        fadeTween:Play()
+        imageFadeTween:Play()
+        
+        fadeTween.Completed:Connect(function()
+            screenGui:Destroy()
+            task.wait(5)
+            Sound:Destroy()
+        end)
+	end
+end)
+
+---====== Run entity ======---
+
+entity:Run()
