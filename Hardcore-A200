@@ -1,0 +1,164 @@
+---====== Load spawner ======---
+
+local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
+
+---====== Create entity ======---
+
+local entity = spawner.Create({
+	Entity = {
+		Name = "The Happy Scribble",
+		Asset = "11914816436",
+		HeightOffset = 0.1
+	},
+	Lights = {
+		Flicker = {
+			Enabled = false,
+			Duration = 0.5
+		},
+		Shatter = false,
+		Repair = false
+	},
+	Earthquake = {
+		Enabled = false
+	},
+	CameraShake = {
+		Enabled = true,
+		Range = 100,
+		Values = {3.5, 35, 0.1, 1.5} -- Magnitude, Roughness, FadeIn, FadeOut
+	},
+	Movement = {
+		Speed = 1500,
+		Delay = 15,
+		Reversed = false
+	},
+	Rebounding = {
+		Enabled = true,
+		Type = "Ambush", -- "Blitz"
+		Min = 5,
+		Max = 5,
+		Delay = 0.4
+	},
+	Damage = {
+		Enabled = true,
+		Range = 50,
+		Amount = 99999
+	},
+	Crucifixion = {
+		Enabled = false,
+		Range = 40,
+		Resist = false,
+		Break = false
+	},
+	Death = {
+		Type = "Guiding", -- "Curious"
+		Hints = {"You died from what was called The Happy Scribble ", "It was formed in that darkness", "But this darkness is darker than ordinary darkness", "So you might need a special way to avoid it", "For instance, hearing the wind from somewhere unknown?"},
+		Cause = ""
+	}
+})
+
+---====== Debug entity ======---
+
+local isspawned = false
+entity:SetCallback("OnSpawned", function()
+    isspawned = true
+    spawn(function()
+        local model = workspace:FindFirstChild("The Happy Scribble")
+        if model then
+            local monster2 = model:FindFirstChild("monster2")
+            if monster2 then
+                local BillboardGui = monster2:FindFirstChild("BillboardGui")
+                if BillboardGui then
+                    local faces = BillboardGui:GetChildren()
+                    while wait(Random.new():NextInteger(0.5,0.7)) and isspawned do
+                        for i,v in pairs(faces) do
+                            v.Visible = false
+                        end
+                        faces[math.random(1,#faces)].Visible = true
+                    end
+                end
+            end
+        end
+    end)
+    spawn(function()
+        local model = workspace:FindFirstChild("The Happy Scribble")
+        if model then
+            local monster2 = model:FindFirstChild("monster2")
+            if monster2 then
+                local windy = monster2:FindFirstChild("windy"..math.random(1,4))
+                if windy then
+                    windy:Play()
+                    windy.RollOffMinDistance = 10
+                    windy.RollOffMaxDistance = 500
+                    windy:Play()
+                end
+            end
+        end
+    end)
+end)
+
+
+entity:SetCallback("OnDespawning", function()
+    local EntityInstance = workspace:FindFirstChild("The Happy Scribble")
+    if EntityInstance then
+        EntityInstance:Destroy()
+    end
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid and humanoid.Health > 0 and not isfile("The Happy Scribble.txt") then
+        local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
+        achievementGiver({
+            Title = "Listen to the wind",
+            Desc = "Why not try to doodle a little?",
+            Reason = "Survive the rare Entity called The Happy Scribble",
+            Image = "rbxassetid://99323894142331"
+        })
+        writefile("The Happy Scribble.txt", "Why not try to doodle a little?")
+    end
+end)
+
+entity:SetCallback("OnDamagePlayer", function(newHealth)
+	if newHealth == 0 then
+		local screenGui = Instance.new("ScreenGui")
+        screenGui.Name = "FullScreenFadeUI"
+        screenGui.ResetOnSpawn = false
+        screenGui.IgnoreGuiInset = true
+        screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+        local frame = Instance.new("Frame")
+        frame.Name = "FullScreenFrame"
+        frame.Size = UDim2.new(1, 0, 1, 0)
+        frame.BackgroundColor3 = Color3.new(1, 1, 1)
+        frame.Parent = screenGui
+
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Name = "FadeText"
+        textLabel.Size = UDim2.new(0.8, 0, 0.2, 0)
+        textLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+        textLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+        textLabel.Text = "Interesting..."
+        textLabel.TextColor3 = Color3.new(0, 0, 0)
+        textLabel.TextScaled = true
+        textLabel.BackgroundTransparency = 1
+        textLabel.Font = Enum.Font.SourceSansBold
+        textLabel.Parent = frame
+
+        wait(0.3)
+
+        local tweenService = game:GetService("TweenService")
+        local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+
+        local frameTween = tweenService:Create(frame, tweenInfo, {BackgroundTransparency = 1})
+        local textTween = tweenService:Create(textLabel, tweenInfo, {TextTransparency = 1})
+
+        frameTween.Completed:Connect(function()
+            screenGui:Destroy()
+        end)
+
+        frameTween:Play()
+        textTween:Play()
+	end
+end)
+---====== Run entity ======---
+
+entity:Run()
