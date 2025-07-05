@@ -21,8 +21,7 @@ local function safeGetCurrentRoom(latestRoom)
     end
 end
 
-local function main()
-    local function hasModel(name)
+local function hasKey(name)
     local LatestRoomValue = game.ReplicatedStorage.GameData.LatestRoom.Value
     local LatestRoom = Workspace.CurrentRooms[LatestRoomValue]
     for _, descendant in ipairs(LatestRoom:GetDescendants()) do
@@ -31,11 +30,19 @@ local function main()
         end
     end
     return false
-    end
-    if not hasModel("SeekMovingNewClone") or not hasModel("FigureRig") or not hasModel("GrumbleRig") or not hasModel("TrueSeek") then
-        while hasModel("FuseObtain") or hasModel("KeyObtain") or hasModel("LeverForGate") do
-            wai1(0.1)
+end
+local function hasModel(name)
+    for _, descendant in ipairs(workspace:GetDescendants()) do
+        if descendant.Name == name then
+            return true
         end
+    end
+    return false
+end
+if not hasModel("SeekMovingNewClone") or not hasModel("FigureRig") or not hasModel("GrumbleRig") or not hasModel("TrueSeek") then
+    while hasKey("FuseObtain") or hasKey("KeyObtain") or hasKey("LeverForGate") do
+        wai1(0.1)
+    end
         local LatestRoom = safeWaitForLatestRoom()
         local player = game.Players.LocalPlayer
         local Camera = workspace.CurrentCamera
