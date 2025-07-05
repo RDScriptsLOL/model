@@ -148,7 +148,7 @@ function CreateReboundEntity(reversed, isLast)
         },
         Death = {
             Type = "Guiding",
-            Hints = {"You died to who you call Rebound...","He makes his presence known and keeps coming back...","Hide when this happens!","Keep Going!"},
+            Hints = {"You died to who you call Rebound...","He makes his presence known and keeps coming back...","Hide when this happens!"},
             Cause = ""
         }
     })
