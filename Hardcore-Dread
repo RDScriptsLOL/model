@@ -45,17 +45,6 @@ local function IsVisible()
     
     return false
 end
-
-local function hasKey(name)
-    local LatestRoomValue = game.ReplicatedStorage.GameData.LatestRoom.Value
-    local LatestRoom = Workspace.CurrentRooms[LatestRoomValue]
-    for _, descendant in ipairs(LatestRoom:GetDescendants()) do
-        if descendant.Name == name then
-            return true
-        end
-    end
-    return false
-end
 local function hasModel(name)
     for _, descendant in ipairs(workspace:GetDescendants()) do
         if descendant.Name == name then
@@ -65,9 +54,6 @@ local function hasModel(name)
     return false
 end
 if not hasModel("SeekMovingNewClone") or not hasModel("FigureRig") or not hasModel("GrumbleRig") or not hasModel("TrueSeek") then
-    while hasKey("FuseObtain") or hasKey("KeyObtain") or hasKey("LeverForGate") do
-        wai1(0.1)
-    end
     ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
     local LatestRoomValue = ReplicatedStorage.GameData.LatestRoom.Value
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
