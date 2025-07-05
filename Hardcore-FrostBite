@@ -42,8 +42,8 @@ local function hasModel(name)
 end
 
 local function main()
-    if not hasModel("SeekMovingNewClone") or not hasModel("FigureRig") or not hasModel("GrumbleRig") or not hasModel("TrueSeek") then
-        if not hasKey("FuseObtain") or not hasKey("KeyObtain") or not hasKey("LeverForGate") then
+    if not hasModel("SeekMovingNewClone") and not hasModel("FigureRig") and not hasModel("GrumbleRig") and not hasModel("TrueSeek") then
+        if not hasKey("FuseObtain") and not hasKey("KeyObtain") and not hasKey("LeverForGate") then
             local LatestRoom = safeWaitForLatestRoom()
             local player = game.Players.LocalPlayer
             local Camera = workspace.CurrentCamera
