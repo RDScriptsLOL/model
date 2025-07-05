@@ -1,213 +1,236 @@
-local currentHighlights = {}
-local rushIndicator = nil
-local ambushIndicator = nil
-
-local function clearAllHighlights()
-    for _, highlight in pairs(currentHighlights) do
-        if highlight and highlight.Parent then
-            highlight:Destroy()
-        end
+local function safeWaitForLatestRoom()
+    while not game.ReplicatedStorage:FindFirstChild("GameData") or not game.ReplicatedStorage.GameData:FindFirstChild("LatestRoom") do
+        task.wait()
     end
-    currentHighlights = {}
+    game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+    return game.ReplicatedStorage.GameData.LatestRoom.Value
 end
 
-local function highlight(model)
-    if model then
-        local existingHighlight = model:FindFirstChildOfClass("Highlight")
-        if existingHighlight then
-            existingHighlight:Destroy()
+local function safeGetCurrentRoom(latestRoom)
+    while not workspace:FindFirstChild("CurrentRooms") do
+        task.wait()
+    end
+    
+    local maxAttempts = 10
+    for i = 1, maxAttempts do
+        local room = workspace.CurrentRooms:FindFirstChild(tostring(latestRoom))
+        if room then
+            return room
         end
-        local h = Instance.new("Highlight")
-        h.Parent = model
-        h.FillTransparency = 1
-        h.OutlineTransparency = 0
-        table.insert(currentHighlights, h)
+        task.wait(0.5)
     end
 end
 
-local function createRushIndicator(rushModel)
-    if not rushModel then return end
-    
-    if rushIndicator and rushIndicator.Parent then
-        return
+local function hasKey(name)
+    local LatestRoomValue = game.ReplicatedStorage.GameData.LatestRoom.Value
+    local LatestRoom = workspace.CurrentRooms[LatestRoomValue]
+    for _, descendant in ipairs(LatestRoom:GetDescendants()) do
+        if descendant.Name == name then
+            return true
+        end
     end
-    
-    local attachment = rushModel:FindFirstChild("Attachment", true)
-    if not attachment then
-        attachment = Instance.new("Attachment")
-        attachment.Name = "RushIndicatorAttachment"
-        attachment.Parent = rushModel.PrimaryPart or rushModel:FindFirstChildWhichIsA("BasePart")
-    end
-    
-    local billboardGui = Instance.new("BillboardGui")
-    billboardGui.Name = "RushIndicator"
-    billboardGui.Size = UDim2.new(10, 0, 10, 0)
-    billboardGui.AlwaysOnTop = true
-    billboardGui.LightInfluence = 1
-    billboardGui.MaxDistance = 100000
-    billboardGui.Parent = attachment
-    
-    local imageLabel = Instance.new("ImageLabel")
-    imageLabel.Name = "IndicatorImage"
-    imageLabel.Size = UDim2.new(0.8, 0, 0.8, 0)
-    imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-    imageLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
-    imageLabel.BackgroundTransparency = 0
-    imageLabel.Image = "rbxassetid://6842825462"
-    imageLabel.BackgroundColor3 = Color3.new(0, 0, 0)
-    imageLabel.Parent = billboardGui
-    
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(1, 0)
-    UICorner.Parent = imageLabel
-    
-    rushIndicator = billboardGui
+    return false
 end
 
-local function createAmbushIndicator(ambushModel)
-    if not ambushModel then return end
-    
-    if ambushIndicator and ambushIndicator.Parent then
-        return
+local function hasModel(name)
+    for _, descendant in ipairs(workspace:GetDescendants()) do
+        if descendant.Name == name then
+            return true
+        end
     end
-    
-    local attachment = ambushModel:FindFirstChild("Attachment", true)
-    if not attachment then
-        attachment = Instance.new("Attachment")
-        attachment.Name = "AmbushIndicatorAttachment"
-        attachment.Parent = ambushModel.PrimaryPart or ambushModel:FindFirstChildWhichIsA("BasePart")
-    end
-    
-    local billboardGui = Instance.new("BillboardGui")
-    billboardGui.Name = "AmbushIndicator"
-    billboardGui.Size = UDim2.new(10, 0, 10, 0)
-    billboardGui.AlwaysOnTop = true
-    billboardGui.LightInfluence = 1
-    billboardGui.MaxDistance = 100000
-    billboardGui.Parent = attachment
-    
-    local imageLabel = Instance.new("ImageLabel")
-    imageLabel.Name = "IndicatorImage"
-    imageLabel.Size = UDim2.new(0.8, 0, 0.8, 0)
-    imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-    imageLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
-    imageLabel.BackgroundTransparency = 0
-    imageLabel.Image = "rbxassetid://10110576663"
-    imageLabel.BackgroundColor3 = Color3.new(0, 0, 0)
-    imageLabel.Parent = billboardGui
-    
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(1, 0)
-    UICorner.Parent = imageLabel
-    
-    ambushIndicator = billboardGui
+    return false
 end
 
-local function updateHighlights()
-    local currentLatestRoom = game.ReplicatedStorage.GameData.LatestRoom.Value
-    
-    local currentRoom = game.Workspace.CurrentRooms[currentLatestRoom]
-    if currentRoom then
-        local currentDoor = currentRoom.Door:FindFirstChild("Door", true)
-        highlight(currentDoor)
-    end
-
-    for _, figure in pairs(game.Workspace:GetDescendants()) do
-        if figure.Name == "FigureRig" then
-            highlight(figure)
-        end
-    end
-    
-    for _, hintBook in pairs(game.Workspace:GetDescendants()) do
-        if hintBook.Name == "LiveHintBook" then
-            highlight(hintBook)
-        end
-    end
-    
-    for _, LeverForGate in pairs(game.Workspace:GetDescendants()) do
-        if LeverForGate.Name == "LeverForGate" then
-            highlight(LeverForGate)
-        end
-    end
-
-    for _, FuseObtain in pairs(game.Workspace:GetDescendants()) do
-        if FuseObtain.Name == "FuseObtain" then
-            highlight(FuseObtain)
-        end
-    end
-    
-    for _, KeyObtain in pairs(game.Workspace:GetDescendants()) do
-        if KeyObtain.Name == "KeyObtain" then
-            highlight(KeyObtain)
-        end
-    end
-    
-    for _, MinesGenerator in pairs(game.Workspace:GetDescendants()) do
-        if MinesGenerator.Name == "MinesGenerator" then
-            highlight(MinesGenerator)
-        end
-    end
-    
-    for _, MinesGateButton in pairs(game.Workspace:GetDescendants()) do
-        if MinesGateButton.Name == "MinesGateButton" then
-            highlight(MinesGateButton)
-        end
-    end
-    
-    local rushMoving = game.Workspace:FindFirstChild("RushMoving")
-    if rushMoving then
-        local rushNew = rushMoving:FindFirstChild("RushNew")
-        if rushNew then
-            createRushIndicator(rushNew)
-        end
-    end
-    
-    local ambushMoving = game.Workspace:FindFirstChild("AmbushMoving")
-    if ambushMoving then
-        createAmbushIndicator(ambushMoving)
-    end
-end
-
-local debounce = false
-local function onRoomChanged()
-    if not debounce then
-        debounce = true
-        clearAllHighlights()
-        updateHighlights()
-        wait(0.5)
-        debounce = false
-    end
-end
-
-local function monitorEntities()
-    while true do
-        local rushMoving = game.Workspace:FindFirstChild("RushMoving")
-        if rushMoving then
-            local rushNew = rushMoving:FindFirstChild("RushNew")
-            if rushNew then
-                createRushIndicator(rushNew)
+local function main()
+    if not hasModel("SeekMovingNewClone") or not hasModel("FigureRig") or not hasModel("GrumbleRig") or not hasModel("TrueSeek") then
+        if not hasKey("FuseObtain") or not hasKey("KeyObtain") or not hasKey("LeverForGate") then
+            local LatestRoom = safeWaitForLatestRoom()
+            local player = game.Players.LocalPlayer
+            local Camera = workspace.CurrentCamera
+            local Character = player.Character or player.CharacterAdded:Wait()
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+            local CameraShaker = require(ReplicatedStorage:WaitForChild("CameraShaker"))
+            
+            local currentRoom = safeGetCurrentRoom(LatestRoom)
+            if not currentRoom then return end
+            
+            local nodes = currentRoom:FindFirstChild("Nodes") or currentRoom:FindFirstChild("PathfindNodes")
+            if not nodes then return end
+            
+            local success, Model0 = pcall(function()
+                return game:GetObjects("rbxassetid://12272255258")[1]
+            end)
+            
+            if not success or not Model0 then return end
+            
+            local Part1 = Model0:FindFirstChild("FrostyNew")
+            if not Part1 then
+                Model0:Destroy()
+                return
             end
-        else
-            if rushIndicator then
-                rushIndicator:Destroy()
-                rushIndicator = nil
+            
+            local Attachment1 = Part1:FindFirstChild("Attachment")
+            if not Attachment1 then
+                Model0:Destroy()
+                return
+            end
+            
+            local numChildren = #nodes:GetChildren()
+            if numChildren == 0 then
+                Model0:Destroy()
+                return
+            end
+            
+            local num = math.floor(numChildren / 2)
+            local targetNode = num == 0 and currentRoom:FindFirstChild("Base") or nodes:GetChildren()[num]
+            
+            if not targetNode then
+                Model0:Destroy()
+                return
+            end
+            
+            Model0:PivotTo(targetNode.CFrame + Vector3.new(0, 11, 0))
+            Model0.Parent = workspace
+            
+            local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+                Camera.CFrame = Camera.CFrame * shakeCf
+            end)
+            camShake:Start()
+            
+            local ColorCorrectionEffect0 = Instance.new("ColorCorrectionEffect")
+            ColorCorrectionEffect0.Parent = game:GetService("Lighting")
+            ColorCorrectionEffect0.TintColor = Color3.new(1, 1, 1)
+            ColorCorrectionEffect0.Enabled = false
+            
+            local c = camShake:StartShake(3.6, 55, 5)
+            Attachment1.face.Enabled = false
+            Attachment1.BlackTrail.Enabled = false
+            Attachment1.Heylois.Enabled = false
+            Attachment1.smoke.Enabled = true
+            Attachment1.BlackTrai3l.Enabled = true
+            Attachment1.BlackTrai2l.Enabled = true
+            Part1.Part.ParticleEmitter.Enabled = false
+            Part1["Static Effect"]:Play()
+            
+            task.wait(5)
+            local EntityPart = Part1
+            EntityPart["Static Effect"]:Play()
+            game.TweenService:Create(EntityPart["Static Effect"], TweenInfo.new(2), {Pitch = 0}):Play()
+            c:StartFadeOut(2.5)
+            
+            task.wait(2)
+            local c2 = camShake:StartShake(2, 55, 25, nil, Vector3.new(5, 5, 5))
+            game.TweenService:Create(ColorCorrectionEffect0, TweenInfo.new(7), {TintColor = Color3.new(0.00784314, 0.188235, 1)}):Play()
+            local diediedie = true
+            
+            spawn(function()
+                while task.wait(1) and diediedie do
+                    local hum = Character:FindFirstChildOfClass("Humanoid")
+                    if hum and hum.Health > 0 then
+                        local lighter = Character:FindFirstChild("Lighter") or Character:FindFirstChild("Candle")
+                        if lighter then
+                            local Enabled = lighter:GetAttribute("Enabled")
+                            if Enabled == false or Enabled == nil then
+                                hum:TakeDamage(5)
+                            end
+                        else
+                            hum:TakeDamage(5)
+                        end
+                        
+                        local Players = game:GetService("Players")
+                        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+                        local Plr = Players.LocalPlayer
+                        local Char = Plr.Character
+                        local Hum = Char:FindFirstChildOfClass("Humanoid")
+                        if Hum.Health < 1 then 
+                            ReplicatedStorage.GameStats["Player_"..Plr.Name].Total.DeathCause.Value = "FrostBite"
+                            firesignal(ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, {
+                                "You died to who you call FrostBite...",
+                                "He will spawn in the middle and start freezing the room.",
+                                "Find something that has heat to keep you warm!"
+                            }, "Blue")
+                        end
+                    end
+                end
+            end)
+            
+            ColorCorrectionEffect0.Enabled = true
+            Attachment1.face.Enabled = true
+            Attachment1.BlackTrail.Enabled = true
+            Attachment1.Heylois.Enabled = true
+            Attachment1.smoke.Enabled = true
+            Attachment1.BlackTrai3l.Enabled = true
+            Attachment1.BlackTrai2l.Enabled = true
+            Part1.Part.ParticleEmitter.Enabled = true
+            EntityPart.Ambience:Play()
+            EntityPart.AmbienceFar:Play()
+            
+            game:GetService("ReplicatedStorage").GameData.LatestRoom:GetPropertyChangedSignal("Value"):Wait()
+            diediedie = false
+            c2:StartFadeOut(15)
+            c:StartFadeOut(1)
+            Part1["Static Effect"]:Stop()
+            EntityPart.Ambience:Stop()
+            EntityPart.AmbienceFar:Stop()
+            
+            local Sound55 = Instance.new("Sound", Part1)
+            local FlangeSoundEffect1 = Instance.new("FlangeSoundEffect")
+            local DistortionSoundEffect2 = Instance.new("DistortionSoundEffect")
+            local FlangeSoundEffect3 = Instance.new("FlangeSoundEffect")
+            
+            Sound55.Name = "ahhhhhh"
+            Sound55.MaxDistance = 500
+            Sound55.Pitch = 0.24
+            Sound55.PlaybackSpeed = 0.24
+            Sound55.RollOffMode = Enum.RollOffMode.InverseTapered
+            Sound55.SoundId = "rbxassetid://6305809364"
+            
+            FlangeSoundEffect1.Parent = Sound55
+            FlangeSoundEffect1.Rate = 0.75
+            FlangeSoundEffect1.Depth = 1
+            FlangeSoundEffect1.Mix = 0.73
+            
+            DistortionSoundEffect2.Parent = Sound55
+            DistortionSoundEffect2.Level = 0.98
+            
+            FlangeSoundEffect3.Parent = Sound55
+            FlangeSoundEffect3.Rate = 0.25
+            FlangeSoundEffect3.Depth = 1
+            FlangeSoundEffect3.Mix = 1
+            
+            Sound55:Play()
+            
+            Attachment1.face.Enabled = false
+            Attachment1.BlackTrail.Enabled = false
+            Attachment1.Heylois.Enabled = false
+            Attachment1.smoke.Enabled = true
+            Attachment1.BlackTrai3l.Enabled = true
+            Attachment1.BlackTrai2l.Enabled = true
+            Part1.Part.ParticleEmitter.Enabled = false
+            
+            Sound55.Ended:Wait()
+            
+            Attachment1.BlackTrai3l.Enabled = false
+            Attachment1.BlackTrai2l.Enabled = false
+            Attachment1.smoke.Enabled = false
+            task.wait(2)
+            Model0:Destroy()
+            game.TweenService:Create(ColorCorrectionEffect0, TweenInfo.new(7), {TintColor = Color3.new(1, 1, 1)}):Play()
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoid = character:WaitForChild("Humanoid")
+            if humanoid and humanoid.Health > 0 and not isfile("FrostBite.txt") then
+                local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
+                achievementGiver({
+                    Title = "Chillingly cold",
+                    Desc = "Are you not cold?",
+                    Reason = "Survive the rare Entity called FrostBite",
+                    Image = "rbxassetid://92788200283682"
+                })
+                writefile("FrostBite.txt", "Are you not cold?")
             end
         end
-        
-        local ambushMoving = game.Workspace:FindFirstChild("AmbushMoving")
-        if ambushMoving then
-            createAmbushIndicator(ambushMoving)
-        else
-            if ambushIndicator then
-                ambushIndicator:Destroy()
-                ambushIndicator = nil
-            end
-        end
-        
-        wait(0.5)
     end
 end
 
-onRoomChanged()
-game.ReplicatedStorage.GameData.LatestRoom.Changed:Connect(onRoomChanged)
-spawn(monitorEntities)
+main()
