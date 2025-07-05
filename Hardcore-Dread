@@ -53,7 +53,7 @@ local function hasModel(name)
     end
     return false
 end
-if not hasModel("SeekMovingNewClone") or not hasModel("FigureRig") or not hasModel("GrumbleRig") or not hasModel("TrueSeek") then
+if not hasModel("SeekMovingNewClone") and not hasModel("FigureRig") and not hasModel("GrumbleRig") and not hasModel("TrueSeek") then
     ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
     local LatestRoomValue = ReplicatedStorage.GameData.LatestRoom.Value
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
