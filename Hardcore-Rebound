@@ -221,7 +221,7 @@ local function Entity(name)
     return false
 end
 
-if not Entity("Rebound") or not Entity("SeekMovingNewClone") or not Entity("FigureRig") or not Entity("GrumbleRig") or not Entity("TrueSeek")then
+if not Entity("Rebound") and not Entity("SeekMovingNewClone") and not Entity("FigureRig") and not Entity("GrumbleRig") and not Entity("TrueSeek") then
     local reversed = true
     local maxSpawns = 6
     
