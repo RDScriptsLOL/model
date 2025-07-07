@@ -313,6 +313,10 @@ entity:SetCallback("OnDespawning", function()
             end
         end
     end
+local EntityInstance = workspace:FindFirstChild("Ripper")
+    if EntityInstance then
+        EntityInstance:Destroy()
+    end
     local humanoid = Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
     if humanoid and humanoid.Health > 0 and not isfile("Ripper.txt") then
         if die == false then
