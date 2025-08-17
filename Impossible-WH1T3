@@ -5,7 +5,7 @@ local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/Focus
 local entity = spawner.Create({
     Entity = {
         Name = "WH1T3",
-        Asset = "rbxassetid://134804582474351",
+        Asset = "134804582474351",
         HeightOffset = 0
     },
     Lights = {
@@ -49,22 +49,20 @@ local entity = spawner.Create({
     },
     Death = {
         Type = "Guiding",
-        Hints = {"H̷̡̡̧̻̼̺̖̫̰̥͚̳͎̣͓͕̼̜̆͐ͅ0̷͇̦̬̟̱̣̠̼̻̱̩̲͇̥̪̙͎̩̈́̌́̈́̓̀̿̍͜Ẃ̵̛̛̏͑̔̏̿͊͐̆̋̈͐̐͘͜", "H̷̡̡̧̻̼̺̖̫̰̥͚̳͎̣͓͕̼̜̆͐ͅ0̷͇̦̬̟̱̣̠̼̻̱̩̲͇̥̪̙͎̩̈́̌́̈́̓̀̿̍͜Ẃ̵̛̛̏͑̔̏̿͊͐̆̋̈͐̐͘͜", "H̷̡̡̧̻̼̺̖̫̰̥͚̳͎̣͓͕̼̜̆͐ͅ0̷͇̦̬̟̱̣̠̼̻̱̩̲͇̥̪̙͎̩̈́̌́̈́̓̀̿̍͜Ẃ̵̛̛̏͑̔̏̿͊͐̆̋̈͐̐͘͜", "H̷̡̡̧̻̼̺̖̫̰̥͚̳͎̣͓͕̼̜̆͐ͅ0̷͇̦̬̟̱̣̠̼̻̱̩̲͇̥̪̙͎̩̈́̌́̈́̓̀̿̍͜Ẃ̵̛̛̏͑̔̏̿͊͐̆̋̈͐̐͘͜"},
+        Hints = {"Y̵̨̥̻͔̖̅̈0̢̧̦͓̖̽͛́ứ̴̵̧̦̣̕ ̴̶̸̡͕̼̐̈6̵̸̷̢̨͔̦͊l̷̴̵̶̦̻̖͓e̴̵̦̮̐͌̐̀ḑ̥͔̤̦̖͔̮ ̶̷̵̹͖̦̃̐t̴̡̗̦̣͌͆̊0̷̵̶̶̸̗̻̺ ̧̭̤̖̊̽̀̃W̵̧̗̺̖̊͊͟Ḥ̶̵̨̡̥̺͜1̶̨̛̥̖̮͌̄T̴͚̤͔͔̄̀̂3̴̵̷̣͚̥́̀", "Ẽ̶̸̡̺̗̕͝r̵̮̊͋̅͌̈̆r̵̢̤̣̭͚͋͜ȯ̸̴̤̦̮͆͝ṛ̨̮͕͖̊͛͌", "Ẽ̶̸̡̺̗̕͝r̵̮̊͋̅͌̈̆r̵̢̤̣̭͚͋͜ȯ̸̴̤̦̮͆͝ṛ̨̮͕͖̊͛͌"},
         Cause = ""
     }
 })
 
----====== Debug entity ======---
 entity:SetCallback("OnSpawned", function()
     local sound = Instance.new("Sound")
     sound.SoundId = "rbxassetid://131489490"
     sound.Looped = false
     sound.Parent = workspace
-    sound.Volume = 3.1
+    sound.Volume = 0.5
     sound:Play()
 
     sound.Ended:Connect(function()
-        wait(1)
         sound:Destroy()
     end)
 
@@ -76,32 +74,31 @@ entity:SetCallback("OnSpawned", function()
             end
         end
     end
-    
+
     local mainColorCorrection = getMainColorCorrection()
     if mainColorCorrection then
         local TweenService = game:GetService("TweenService")
-    
+
         local contrastTween1 = TweenService:Create(mainColorCorrection, TweenInfo.new(1), {Contrast = 1})
         local saturationTween1 = TweenService:Create(mainColorCorrection, TweenInfo.new(1), {Saturation = 1})
         local tintColorTween1 = TweenService:Create(mainColorCorrection, TweenInfo.new(1), {TintColor = Color3.fromRGB(255, 0, 0)})
-    
+
         local contrastTween2 = TweenService:Create(mainColorCorrection, TweenInfo.new(1), {Contrast = 0.05})
         local saturationTween2 = TweenService:Create(mainColorCorrection, TweenInfo.new(1), {Saturation = 0.2})
         local tintColorTween2 = TweenService:Create(mainColorCorrection, TweenInfo.new(1), {TintColor = Color3.fromRGB(255, 255, 255)})
-    
+
         contrastTween1:Play()
         saturationTween1:Play()
         tintColorTween1:Play()
-    
+
         tintColorTween1.Completed:Connect(function()
-            wait(4)
+            task.wait(4)
             contrastTween2:Play()
             saturationTween2:Play()
             tintColorTween2:Play()
         end)
     end
 end)
-
 entity:SetCallback("OnDamagePlayer", function(newHealth)
     if newHealth == 0 then
         wait(12)
