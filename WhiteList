@@ -15,7 +15,8 @@ local WhiteList = {
     ["土豆"] = "7594218120",
     ["China_ASH500"] = "4287873323",
     ["Xue_ba2024"] = "6123431171",
-    ["秋岚"] = "3796493262"
+    ["秋岚"] = "3796493262",
+    ["litianshuo233_cn"] = "5107701070"
 }
 local IsWhiteList = false
 for Name, Id in pairs(WhiteList) do
