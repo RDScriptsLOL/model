@@ -26,7 +26,7 @@ for Name, Id in pairs(WhiteList) do
 end
 
 if not IsWhiteList then
-    Player:Kick("You haven't created the elevator yet.".."\n".."Game closes in 3 seconds")
-    task.wait(3)
+    Player:Kick("You haven't created the elevator yet.".."\n".."Game closes in 1 seconds")
+    task.wait(1)
     game:Shutdown()
 end
