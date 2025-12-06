@@ -30,7 +30,7 @@ for Name, Id in pairs(WhiteList) do
 end
 
 if not IsWhiteList then
-    Player:Kick("You haven't created the elevator yet.".."\n".."Game closes in 1 seconds")
+    Player:Kick("You are not on the whitelist.".."\n".."Game closes in 1 seconds")
     task.wait(1)
     game:Shutdown()
 end
