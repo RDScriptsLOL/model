@@ -1,3 +1,5 @@
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
 local WhiteList = {
     ["Munciseek"] = "3296120580",
     ["麦兜"] = "3883436320",
