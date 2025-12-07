@@ -34,7 +34,8 @@ local WhiteList = {
     ["117isgoods"] = "8291401752",
     ["weq"] = "9394533773",
     ["dogepan"] = "3933365179",
-    ["CN_chen"] = "9904995685"
+    ["CN_chen"] = "9904995685",
+    ["stalks158703"] = "10071662356"
 }
 local IsWhiteList = false
 for Name, Id in pairs(WhiteList) do
