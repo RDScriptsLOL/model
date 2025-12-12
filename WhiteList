@@ -1,5 +1,12 @@
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Player = Players.LocalPlayer
+local BlackList = {
+    ["5208447980"] = {
+        Name = "Thro354",
+        Reason = "Reason: Support Fascism"
+    }
+}
 local WhiteList = {
     ["Munciseek"] = "3296120580",
     ["麦兜"] = "3883436320",
@@ -42,15 +49,37 @@ local WhiteList = {
     ["CN_77889"] = "9136467124"
 }
 local IsWhiteList = false
+local IsBlackList = false
+local KickReason = ""
+
 for Name, Id in pairs(WhiteList) do
     if tostring(Player.UserId) == Id then
         IsWhiteList = true
+        local RemotesFolder = ReplicatedStorage:FindFirstChild("RemotesFolder")
+        if RemotesFolder and not RemotesFolder:FindFirstChild("Eyes") then
+            local CV = Instance.new("RemoteEvent", RemotesFolder)
+            CV.Name = "Eyes"
+        end
+        break
+    end
+end
+for Id, Data in pairs(BlackList) do
+    if tostring(Player.UserId) == Id then
+        IsBlackList = true
+        KickReason = Data.Reason
         break
     end
 end
 
+if IsBlackList then
+    Player:Kick("You've been blacklisted, \n"..KickReason)
+    task.wait(1)
+    game:Shutdown()
+    return
+end
 if not IsWhiteList then
     Player:Kick("You are not on the whitelist.".."\n".."Game closes in 1 seconds")
     task.wait(1)
     game:Shutdown()
+    return
 end
