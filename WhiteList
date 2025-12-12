@@ -1,3 +1,4 @@
+--在非规定时间要白名单的，给你加入黑名单
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Player = Players.LocalPlayer
