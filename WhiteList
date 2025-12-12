@@ -1,18 +1,18 @@
---在非规定时间要白名单的，给你加入黑名单
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Player = Players.LocalPlayer
+
 local BlackList = {
     ["5208447980"] = {
-        Name = "Thro354",
-        Reason = "Reason: Support Fascism"
+        Name = "Thro354 (DY_Film)",
+        Reason = "Support Fascism"
     }
 }
 local WhiteList = {
     ["Munciseek"] = "3296120580",
     ["麦兜"] = "3883436320",
     ["Wicked"] = "4912979218",
-    ["FocusedLight"] = "4044271400",
+    ["Focused_Light"] = "4044271400",
     ["A10cc"] = "7949298665",
     ["bilibili_acqkldseek"] = "8426380600",
     ["菜狗"] = "7383057990",
@@ -49,6 +49,7 @@ local WhiteList = {
     ["114chinese"] = "4136312752",
     ["CN_77889"] = "9136467124"
 }
+
 local IsWhiteList = false
 local IsBlackList = false
 local KickReason = ""
@@ -64,6 +65,7 @@ for Name, Id in pairs(WhiteList) do
         break
     end
 end
+
 for Id, Data in pairs(BlackList) do
     if tostring(Player.UserId) == Id then
         IsBlackList = true
@@ -73,14 +75,15 @@ for Id, Data in pairs(BlackList) do
 end
 
 if IsBlackList then
-    Player:Kick("You've been blacklisted, \n"..KickReason)
-    task.wait(1)
+    Player:Kick("You've been blacklisted.\nReason: "..KickReason)
+    task.wait(2)
     game:Shutdown()
     return
 end
+
 if not IsWhiteList then
-    Player:Kick("You are not on the whitelist.".."\n".."Game closes in 1 seconds")
-    task.wait(1)
+    Player:Kick("You are not on the whitelist.\nGame closes in 2 seconds")
+    task.wait(2)
     game:Shutdown()
     return
 end
