@@ -109,6 +109,7 @@ local WhiteList = {
     ["yinhongchen2010"] = "3776061331";
     ["19978188164qw"] = "4809870114";
     ["dushidog2708"] = "5864772993";
+    ["diayox"] = "7308741129";
 }
 
 local IsWhiteList = false
