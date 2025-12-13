@@ -9,7 +9,7 @@ local BlackList = {
     };
     ["7559024798"] = {
         Name = "qweqwe96054 (快手错误化)";
-        Reason = "Disobeying Group Rules";
+        Reason = "给Munciseek的每个视频三连就放了你";
     };
 }
 
@@ -100,6 +100,11 @@ local WhiteList = {
     ["anzi354"] = "5217882701";
     ["xnbo163"] = "4162326522";
     ["Cave_dweller78s"] = "7334604620";
+    ["MissXinghua"] = "10015696750";
+    ["jiadeyazi1"] = "5171871961";
+    ["Shhsjsjak0"] = "5281364322";
+    ["chenzhheng890"] = "3298640942";
+    ["as303263"] = "8821358083";
 }
 
 local IsWhiteList = false
