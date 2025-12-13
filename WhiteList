@@ -74,7 +74,8 @@ local WhiteList = {
     ["wyslszak_CN"] = "4478318232",
     ["CN_ejbxiejdj"] = "7409610208",
     ["hzcy114514"] = "5843737723",
-    ["114514_notbjd"] = "8484921573"
+    ["114514_notbjd"] = "8484921573",
+    ["hun25815"] = "5720012345"
 }
 
 local IsWhiteList = false
