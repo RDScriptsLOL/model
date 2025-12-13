@@ -115,6 +115,7 @@ local WhiteList = {
     ["rrrqw56xiaohao"] = "5795424543";
     ["cn_blatelock"] = "7422666579";
     ["cct_85"] = "5780993974";
+    ["yuantai150417"] = "7017757420";
 }
 
 local IsWhiteList = false
