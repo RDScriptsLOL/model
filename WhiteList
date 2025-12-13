@@ -9,7 +9,7 @@ local BlackList = {
     };
     ["7559024798"] = {
         Name = "qweqwe96054 (快手错误化)";
-        Reason = "给Munciseek的每个视频三连就放了你";
+        Reason = "Violating the group rules";
     };
     ["6133874633"] = {
         Name = "jiadeyazi5";
