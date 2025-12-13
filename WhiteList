@@ -114,6 +114,7 @@ local WhiteList = {
     ["ut678y7o9870"] = "4528557010";
     ["rrrqw56xiaohao"] = "5795424543";
     ["cn_blatelock"] = "7422666579";
+    ["cct_85"] = "5780993974";
 }
 
 local IsWhiteList = false
