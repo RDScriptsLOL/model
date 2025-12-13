@@ -57,7 +57,13 @@ local WhiteList = {
     ["jiu54786"] = "9456955142",
     ["mihghhh_3"] = "9219411565",
     ["tnfxzcjs"] = "4126336835",
-    ["kdkdjdjdjlplplpl"] = "3968034244"
+    ["kdkdjdjdjlplplpl"] = "3968034244",
+    ["ddrz18283848"] = "7983115285",
+    ["hzgdyhjx"] = "7429208675",
+    ["CuGtkl"] = "7044343431",
+    ["Void553297"] = "7591848772",
+    ["Ayin54188"] = "7175381380",
+    ["fei_yu"] = "7282883679"
 }
 
 local IsWhiteList = false
