@@ -620,6 +620,8 @@ function SetDeathHints(entityTable)
 	if #deathHints > 0 then
 		if firesignal then
 			firesignal(remotesFolder.DeathHint.OnClientEvent, deathHints, deathType)
+		else
+			warn("firesignal not supported, ignore death hints.")
 		end
 	end
 
@@ -781,15 +783,18 @@ function PrerunCheck(entityTable)
 	local rebounding = config.Rebounding
 
 	if entityTable.Model:GetAttribute("Running") then
+		warn("Entity awweady wunnying :3 sowwy")
         return false
 
 	elseif rebounding.Enabled and (rebounding.Min <= 0 or rebounding.Max <= 0 or rebounding.Min > rebounding.Max) then
+		warn("Invalid rebounding values, returning.")
 		return false
 	end
 	
 	
 	for _, v in GetAllDatatypes(config, "number", {"Entity.HeightOffset", "CameraShake.Values", "Delay"}) do
 		if v.value <= 0 then
+			warn(("Invalid number value: '%s', returning."):format(v.path))
 			return false
 		end
 	end
@@ -812,14 +817,17 @@ spawner.Create = function(config)
 			local m = LoadCustomInstance(asset)
 			if m then
 				if m.ClassName ~= "Model" then
+					warn("Entity asset is not a model, returning.")
 					return
 				end
 			else
+				warn("Failed to load entity asset, returning.")
 				return
 			end
 			return m
 		end)
 	else
+		warn("Invalid entity asset type, returning.") 
 		return
 	end
 	
@@ -855,7 +863,11 @@ spawner.Create = function(config)
 				if self.Debug[key] then
 					if typeof(callback) == "function" then
 						self.Debug[key] = callback
+					else
+						warn("Failed to set callback, invalid callback datatype.")
 					end
+				else
+					warn("Failed to set callback, invalid callback key.")
 				end
 			end,
 			RunCallback = function(self, key, ...)
@@ -863,6 +875,7 @@ spawner.Create = function(config)
 				if callback then
 					local success, result = pcall(callback, ...)
 					if not success then
+						warn(("Error in callback: '%s' for entity: '%s':\n%s"):format(key, self.Config.Entity.Name, result))
 					end
 				end
 			end,
