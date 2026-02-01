@@ -19,7 +19,7 @@ local lastRespawn;
 local BaseEntitySpeed = 65
 local colourGuiding = Color3.fromRGB(137, 207, 255)
 
-local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/Focuslol666/Utilities/patch-1/Doors/Custom%20Achievements/Source.lua"))()
+local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/RDScriptsLOL/model/main/ccc"))()
 
 if not _G.achievementUnlock then
     _G.achievementUnlock = {}
