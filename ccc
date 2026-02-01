@@ -7,7 +7,7 @@ local GlobalUI = PlayerGui:FindFirstChild("GlobalUI") if not GlobalUI then retur
 local AchievementsHolder = GlobalUI:FindFirstChild("AchievementsHolder") if not AchievementsHolder then return end
 
 local ModuleScripts = {
-    AchievementUnlock = require(AchievementsHolder:FindFirstChild("LiveAchievement", true)),
+    AchievementUnlock = require(PlayerGui:FindFirstChild("AchievementUnlock", true)),
     Achievements = require(ReplicatedStorage.ModulesShared.Achievements)
 }
 local Default = {
