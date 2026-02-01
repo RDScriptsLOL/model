@@ -793,7 +793,7 @@ function PrerunCheck(entityTable)
 	
 	
 	for _, v in GetAllDatatypes(config, "number", {"Model.HeightOffset", "Shake.Values", "Delay"}) do
-		if v.value <= 0 then
+		if v.value < 0 then
 			warn(("Invalid number value: '%s', returning."):format(v.path))
 			return false
 		end
