@@ -1,33 +1,32 @@
--- Services
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- Variables
-local localPlayer = Players.LocalPlayer
-local playerGui = localPlayer:WaitForChild("PlayerGui")
+local Player = Players.LocalPlayer
+local PlayerGui = Player:FindFirstChild("PlayerGui") if not PlayerGui then return end
+local GlobalUI = PlayerGui:FindFirstChild("GlobalUI") if not GlobalUI then return end
+local AchievementsHolder = GlobalUI:FindFirstChild("AchievementsHolder") if not AchievementsHolder then return end
 
-local moduleScripts = {
-    AchievementUnlock = require(playerGui:FindFirstChild("AchievementUnlock", true)),
+local ModuleScripts = {
+    AchievementUnlock = require(AchievementsHolder:FindFirstChild("LiveAchievement", true)),
     Achievements = require(ReplicatedStorage.ModulesShared.Achievements)
 }
-local defaultAchievement = {
+local Default = {
     Title = "Title",
     Desc = "Description",
     Reason = "Reason",
     Image = "rbxassetid://12309073114"
 }
 
--- Main
-return function(info)
-    info = (type(info) == "table") and info or {}
-    for i, v in defaultAchievement do
-        if info[i] == nil then
-            info[i] = v
+return function(Info)
+    Info = (type(Info) == "table") and Info or {}
+    for i, v in Default do
+        if Info[i] == nil then
+            Info[i] = v
         end
     end
-    local stuff = moduleScripts.Achievements.SpecialQATester
-    local old = stuff.GetInfo
-    stuff.GetInfo = newcclosure(function() return info end)
-    moduleScripts.AchievementUnlock(nil, stuff.Name)
-    stuff.GetInfo = old
+    local Stuff = ModuleScripts.Achievements.SpecialQATester
+    local Old = Stuff.GetInfo
+    Stuff.GetInfo = newcclosure(function() return Info end)
+    ModuleScripts.AchievementUnlock(nil, Stuff.Name)
+    Stuff.GetInfo = Old
 end
